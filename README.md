@@ -1,0 +1,2 @@
+# STM32L475VGTX_AzureRTOS
+configuring NetxDuo for STM32L475VGTX 
