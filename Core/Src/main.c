@@ -102,13 +102,6 @@ int main(void)
   MX_SPI3_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  //if(WIFI_STATUS_OK==WIFI_Init())
-  //{
-	  //if(WIFI_STATUS_OK==WIFI_Connect("SSS_IL","Durgamaa@!$#9",4))
-	  //{
-		  //status=1;
-	  //}
-  //}
 
   /* USER CODE END 2 */
 
