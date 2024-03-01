@@ -276,6 +276,10 @@ UINT stm_network_init(CHAR* ssid, CHAR* password, WiFi_Mode mode)
     // Stash WiFi credentials
     netx_ssid     = ssid;
     netx_password = password;
+    if (netx_ssid[0] == 0)
+    {
+    	return 255;
+    }
 
     switch (mode)
     {

@@ -28,6 +28,8 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l4xx_hal.h"
+#include "hci_tl_interface.h"
+#include "b_l475e_iot01a2.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -57,8 +59,16 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define BT_EXT16_Pin GPIO_PIN_6
+#define BT_EXT16_GPIO_Port GPIOE
+#define BT_EXT16_EXTI_IRQn EXTI9_5_IRQn
+#define BSP_BUTTON_EXTI_IRQn EXTI15_10_IRQn
 #define ISM43362_RST_Pin GPIO_PIN_8
 #define ISM43362_RST_GPIO_Port GPIOE
+#define BT_SPI3_CS_Pin GPIO_PIN_13
+#define BT_SPI3_CS_GPIO_Port GPIOD
+#define BT_RST_Pin GPIO_PIN_8
+#define BT_RST_GPIO_Port GPIOA
 #define ISM43662_SPI_SCK_Pin GPIO_PIN_10
 #define ISM43662_SPI_SCK_GPIO_Port GPIOC
 #define ISM43662_SPI_MISO_Pin GPIO_PIN_11

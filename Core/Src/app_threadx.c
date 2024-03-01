@@ -130,6 +130,10 @@ void tx_app_thread_entry(ULONG thread_input)
     if (status = stm_network_init(WIFI_SSID, WIFI_PASSWORD, WIFI_MODE))
     {
         printf("ERROR: Failed to initialize the network (0x%08x)\r\n", status);
+        if(status==255)
+        {
+        	//restart system
+        }
     }
 
     //else if ((status = http_server_entry(&nx_ip, &nx_pool, &nx_dns_client, sntp_time)))
