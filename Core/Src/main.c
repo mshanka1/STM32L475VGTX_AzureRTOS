@@ -29,10 +29,8 @@
 
 /* USER CODE END Includes */
 
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
+char WiFi_SSID_Memory[20]={'\n'};
+char WiFi_PWD_Memory[50]={'\n'};
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
@@ -41,14 +39,13 @@
 #define TX_TIMEOUT 2000
 #define RX_TIMEOUT 2000
 
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 
 /* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
 
@@ -65,16 +62,21 @@ static void MX_GPIO_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
+
 /* USER CODE END 0 */
 
 /**
   * @brief  The application entry point.
   * @retval int
   */
+extern int memory_driver_read(void);
+extern int memory_driver_write(void);
+
 int main(void)
 {
   /* USER CODE BEGIN 1 */
 	//int status =1;
+
 
   /* USER CODE END 1 */
 
@@ -96,7 +98,12 @@ int main(void)
 
   /* Initialize all configured peripherals */
   //MX_GPIO_Init();
-  WIFI_IO_INIT();
+  //WIFI_IO_INIT();
+  BLE_GPIO_Init();
+  //if(!memory_driver_read())
+  //{
+	 // memory_driver_write();
+  //}
   //MX_BlueNRG_MS_Init();
   /* USER CODE BEGIN 2 */
 
@@ -111,7 +118,6 @@ int main(void)
   {
     /* USER CODE END WHILE */
 	  //MX_BlueNRG_MS_Process();
-
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -187,6 +193,8 @@ static void MX_GPIO_Init(void)
 
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOE, ISM43362_RST_Pin|ISM43362_SPI3_CSN_Pin, GPIO_PIN_RESET);
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(BT_SPI3_CS_GPIO_Port, BT_SPI3_CS_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
@@ -215,11 +223,6 @@ static void MX_GPIO_Init(void)
 
 
 
-  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
-
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */

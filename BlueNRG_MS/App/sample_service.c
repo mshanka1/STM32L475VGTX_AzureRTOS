@@ -92,13 +92,17 @@ tBleStatus Add_Sample_Service(void)
   D973F2E0-B19E-11E2-9E96-0800200C9A66
   D973F2E1-B19E-11E2-9E96-0800200C9A66
   D973F2E2-B19E-11E2-9E96-0800200C9A66
+  D973F2E3-B19E-11E2-9E96-0800200C9A66
+  D973F2E4-B19E-11E2-9E96-0800200C9A66
   */
 
   const uint8_t service_uuid[16] = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x96,0x9e,0xe2,0x11,0x9e,0xb1,0xe0,0xf2,0x73,0xd9};
   const uint8_t charUuidTX[16] = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x96,0x9e,0xe2,0x11,0x9e,0xb1,0xe1,0xf2,0x73,0xd9};
   const uint8_t charUuidRX[16] = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x96,0x9e,0xe2,0x11,0x9e,0xb1,0xe2,0xf2,0x73,0xd9};
+  const uint8_t wifissidTX[16] = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x96,0x9e,0xe2,0x11,0x9e,0xb1,0xe3,0xf2,0x73,0xd9};
+  const uint8_t wifissidRX[16] = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x96,0x9e,0xe2,0x11,0x9e,0xb1,0xe4,0xf2,0x73,0xd9};
 
-  ret = aci_gatt_add_serv(UUID_TYPE_128, service_uuid, PRIMARY_SERVICE, 7, &sampleServHandle); /* original is 9?? */
+  ret = aci_gatt_add_serv(UUID_TYPE_128, service_uuid, PRIMARY_SERVICE, 10, &sampleServHandle); /* original is 9?? */
   if (ret != BLE_STATUS_SUCCESS) goto fail;
 
   ret =  aci_gatt_add_char(sampleServHandle, UUID_TYPE_128, charUuidTX, 20, CHAR_PROP_NOTIFY, ATTR_PERMISSION_NONE, 0,
@@ -109,6 +113,13 @@ tBleStatus Add_Sample_Service(void)
                            16, 1, &RXCharHandle);
   if (ret != BLE_STATUS_SUCCESS) goto fail;
 
+  ret =  aci_gatt_add_char(sampleServHandle, UUID_TYPE_128, wifissidTX, 20, CHAR_PROP_NOTIFY, ATTR_PERMISSION_NONE, 0,
+                           16, 1, &TXCharHandle);
+  if (ret != BLE_STATUS_SUCCESS) goto fail;
+
+  ret =  aci_gatt_add_char(sampleServHandle, UUID_TYPE_128, wifissidRX, 20, CHAR_PROP_WRITE|CHAR_PROP_WRITE_WITHOUT_RESP, ATTR_PERMISSION_NONE, GATT_NOTIFY_ATTRIBUTE_WRITE,
+                           16, 1, &RXCharHandle);
+  if (ret != BLE_STATUS_SUCCESS) goto fail;
   PRINTF("Sample Service added.\nTX Char Handle %04X, RX Char Handle %04X\n", TXCharHandle, RXCharHandle);
   return BLE_STATUS_SUCCESS;
 
@@ -176,7 +187,9 @@ void startReadTXCharHandle(void)
     PRINTF("Start reading TX Char Handle\n");
 
     const uint8_t charUuid128_TX[16] = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x96,0x9e,0xe2,0x11,0x9e,0xb1,0xe1,0xf2,0x73,0xd9};
+    const uint8_t charUuid128_WIFITX[16] = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x96,0x9e,0xe2,0x11,0x9e,0xb1,0xe3,0xf2,0x73,0xd9};
     aci_gatt_disc_charac_by_uuid(connection_handle, 0x0001, 0xFFFF, UUID_TYPE_128, charUuid128_TX);
+    aci_gatt_disc_charac_by_uuid(connection_handle, 0x0001, 0xFFFF, UUID_TYPE_128, charUuid128_WIFITX);
     start_read_tx_char_handle = TRUE;
   }
 }
@@ -193,7 +206,9 @@ void startReadRXCharHandle(void)
     PRINTF("Start reading RX Char Handle\n");
 
     const uint8_t charUuid128_RX[16] = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x96,0x9e,0xe2,0x11,0x9e,0xb1,0xe2,0xf2,0x73,0xd9};
+    const uint8_t charUuid128_WIFIRX[16] = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x96,0x9e,0xe2,0x11,0x9e,0xb1,0xe4,0xf2,0x73,0xd9};
     aci_gatt_disc_charac_by_uuid(connection_handle, 0x0001, 0xFFFF, UUID_TYPE_128, charUuid128_RX);
+    aci_gatt_disc_charac_by_uuid(connection_handle, 0x0001, 0xFFFF, UUID_TYPE_128, charUuid128_WIFIRX);
     start_read_rx_char_handle = TRUE;
   }
 }
@@ -208,10 +223,21 @@ void startReadRXCharHandle(void)
 void receiveData(uint8_t* data_buffer, uint8_t Nb_bytes)
 {
   BSP_LED_Toggle(LED2);
-
-  for(int i = 0; i < Nb_bytes; i++) {
-    printf("%c", data_buffer[i]);
+  if(WiFi_SSID_Memory[0]=='\n')
+  {
+	  for(int i = 0; i < Nb_bytes; i++) {
+	    printf("%c", data_buffer[i]);
+	    WiFi_SSID_Memory[i] = data_buffer[i];
+	  }
   }
+  else if(WiFi_PWD_Memory[0]=='\n')
+  {
+	  for(int i = 0; i < Nb_bytes; i++) {
+	    printf("%c", data_buffer[i]);
+	    WiFi_PWD_Memory[i] = data_buffer[i];
+	  }
+  }
+
   fflush(stdout);
 }
 
@@ -279,7 +305,7 @@ void GAP_ConnectionComplete_CB(uint8_t addr[6], uint16_t handle)
   connection_handle = handle;
 
   printf("Connected to device:");
-  for(int i = 5; i > 0; i--){
+  for(int i = 6; i > 0; i--){
     printf("%02X-", addr[i]);
   }
   printf("%02X\n", addr[0]);

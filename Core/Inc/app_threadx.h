@@ -78,6 +78,7 @@ extern "C" {
 UINT App_ThreadX_Init(VOID *memory_ptr);
 void MX_ThreadX_Init(void);
 void tx_app_thread_entry(ULONG thread_input);
+void tx_ble_thread_entry(ULONG thread_input);
 UINT http_server_entry(
     NX_IP* ip_ptr, NX_PACKET_POOL* pool_ptr, NX_DNS* dns_ptr, UINT (*unix_time_callback)(ULONG* unix_time));
 

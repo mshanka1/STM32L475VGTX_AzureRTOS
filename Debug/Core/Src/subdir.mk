@@ -5,6 +5,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../Core/Src/Memory_Driver.c \
 ../Core/Src/app_threadx.c \
 ../Core/Src/board_ble_init.c \
 ../Core/Src/board_wifi_init.c \
@@ -21,6 +22,7 @@ S_UPPER_SRCS += \
 ../Core/Src/tx_initialize_low_level.S 
 
 OBJS += \
+./Core/Src/Memory_Driver.o \
 ./Core/Src/app_threadx.o \
 ./Core/Src/board_ble_init.o \
 ./Core/Src/board_wifi_init.o \
@@ -38,6 +40,7 @@ S_UPPER_DEPS += \
 ./Core/Src/tx_initialize_low_level.d 
 
 C_DEPS += \
+./Core/Src/Memory_Driver.d \
 ./Core/Src/app_threadx.d \
 ./Core/Src/board_ble_init.d \
 ./Core/Src/board_wifi_init.d \
@@ -60,7 +63,7 @@ Core/Src/%.o: ../Core/Src/%.S Core/Src/subdir.mk
 clean: clean-Core-2f-Src
 
 clean-Core-2f-Src:
-	-$(RM) ./Core/Src/app_threadx.cyclo ./Core/Src/app_threadx.d ./Core/Src/app_threadx.o ./Core/Src/app_threadx.su ./Core/Src/board_ble_init.cyclo ./Core/Src/board_ble_init.d ./Core/Src/board_ble_init.o ./Core/Src/board_ble_init.su ./Core/Src/board_wifi_init.cyclo ./Core/Src/board_wifi_init.d ./Core/Src/board_wifi_init.o ./Core/Src/board_wifi_init.su ./Core/Src/main.cyclo ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/stm32l4xx_hal_msp.cyclo ./Core/Src/stm32l4xx_hal_msp.d ./Core/Src/stm32l4xx_hal_msp.o ./Core/Src/stm32l4xx_hal_msp.su ./Core/Src/stm32l4xx_hal_timebase_tim.cyclo ./Core/Src/stm32l4xx_hal_timebase_tim.d ./Core/Src/stm32l4xx_hal_timebase_tim.o ./Core/Src/stm32l4xx_hal_timebase_tim.su ./Core/Src/stm32l4xx_it.cyclo ./Core/Src/stm32l4xx_it.d ./Core/Src/stm32l4xx_it.o ./Core/Src/stm32l4xx_it.su ./Core/Src/stm_networking.cyclo ./Core/Src/stm_networking.d ./Core/Src/stm_networking.o ./Core/Src/stm_networking.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32l4xx.cyclo ./Core/Src/system_stm32l4xx.d ./Core/Src/system_stm32l4xx.o ./Core/Src/system_stm32l4xx.su ./Core/Src/tx_initialize_low_level.d ./Core/Src/tx_initialize_low_level.o
+	-$(RM) ./Core/Src/Memory_Driver.cyclo ./Core/Src/Memory_Driver.d ./Core/Src/Memory_Driver.o ./Core/Src/Memory_Driver.su ./Core/Src/app_threadx.cyclo ./Core/Src/app_threadx.d ./Core/Src/app_threadx.o ./Core/Src/app_threadx.su ./Core/Src/board_ble_init.cyclo ./Core/Src/board_ble_init.d ./Core/Src/board_ble_init.o ./Core/Src/board_ble_init.su ./Core/Src/board_wifi_init.cyclo ./Core/Src/board_wifi_init.d ./Core/Src/board_wifi_init.o ./Core/Src/board_wifi_init.su ./Core/Src/main.cyclo ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/stm32l4xx_hal_msp.cyclo ./Core/Src/stm32l4xx_hal_msp.d ./Core/Src/stm32l4xx_hal_msp.o ./Core/Src/stm32l4xx_hal_msp.su ./Core/Src/stm32l4xx_hal_timebase_tim.cyclo ./Core/Src/stm32l4xx_hal_timebase_tim.d ./Core/Src/stm32l4xx_hal_timebase_tim.o ./Core/Src/stm32l4xx_hal_timebase_tim.su ./Core/Src/stm32l4xx_it.cyclo ./Core/Src/stm32l4xx_it.d ./Core/Src/stm32l4xx_it.o ./Core/Src/stm32l4xx_it.su ./Core/Src/stm_networking.cyclo ./Core/Src/stm_networking.d ./Core/Src/stm_networking.o ./Core/Src/stm_networking.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32l4xx.cyclo ./Core/Src/system_stm32l4xx.d ./Core/Src/system_stm32l4xx.o ./Core/Src/system_stm32l4xx.su ./Core/Src/tx_initialize_low_level.d ./Core/Src/tx_initialize_low_level.o
 
 .PHONY: clean-Core-2f-Src
 
