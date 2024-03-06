@@ -25,10 +25,17 @@ RM := rm -rf
 -include Middlewares/ST/netxduo/addons/dhcp/subdir.mk
 -include Middlewares/ST/netxduo/addons/cloud/subdir.mk
 -include Middlewares/ST/netxduo/addons/auto_ip/subdir.mk
+-include Middlewares/ST/BlueNRG-MS/utils/subdir.mk
+-include Middlewares/ST/BlueNRG-MS/hci/hci_tl_patterns/Basic/subdir.mk
+-include Middlewares/ST/BlueNRG-MS/hci/controller/subdir.mk
+-include Middlewares/ST/BlueNRG-MS/hci/subdir.mk
 -include Drivers/STM32L4xx_HAL_Driver/Src/subdir.mk
+-include Drivers/BSP/B-L475E-IOT01A2/subdir.mk
 -include Core/wifi_driver/inventek/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
+-include BlueNRG_MS/Target/subdir.mk
+-include BlueNRG_MS/App/subdir.mk
 -include AZURE_RTOS/App/subdir.mk
 -include objects.mk
 

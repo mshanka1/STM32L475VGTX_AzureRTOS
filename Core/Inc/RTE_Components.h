@@ -25,7 +25,11 @@
 /* STMicroelectronics.X-CUBE-AZRTOS-L4.2.0.0 */
 #define THREADX_ENABLED
 #define NETXDUO_ENABLED
-ADDONS_NAT_ENABLED
+//ADDONS_NAT_ENABLED
 #define NX_CLOUD_ENABLED
+/* STMicroelectronics.X-CUBE-BLE1.7.0.0 */
+#define SAMPLE_APP
+#define HCI_TL
+#define HCI_TL_INTERFACE
 
 #endif /* __RTE_COMPONENTS_H__ */
