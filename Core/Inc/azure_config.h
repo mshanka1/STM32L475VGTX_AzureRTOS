@@ -15,12 +15,8 @@ typedef enum
 // ----------------------------------------------------------------------------
 // WiFi connection config
 // ----------------------------------------------------------------------------
-
-extern char WiFi_SSID_Memory[];
-extern char WiFi_PWD_Memory[];
-
-#define WIFI_SSID     WiFi_SSID_Memory
-#define WIFI_PASSWORD WiFi_PWD_Memory
+#define WIFI_SSID     ""
+#define WIFI_PASSWORD ""
 #define WIFI_MODE     WPA2_PSK_AES
 
 // ----------------------------------------------------------------------------
