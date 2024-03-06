@@ -344,7 +344,10 @@ void Error_Handler(void);
 /* USER CODE END Private defines */
 extern char WiFi_SSID_Memory[];
 extern char WiFi_PWD_Memory[];
-
+extern void ble_gpio_init(void);
+extern int memory_driver_read(void);
+extern int memory_driver_write(void);
+extern void copy_data(void);
 
 #ifdef __cplusplus
 }

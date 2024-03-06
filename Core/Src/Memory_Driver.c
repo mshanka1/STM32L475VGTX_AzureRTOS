@@ -7,7 +7,7 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 #include "main.h"
-
+#include "string.h"
 #define FLASH_ROW_SIZE          64
 
 /* !!! Be careful the user area should be in another bank than the code !!! */
@@ -34,17 +34,6 @@ union UT_FALSH_DATA
 		uint8_t  wifi_pwd_memory[50];                                          /**< The currently selected protocol */
 	}ConfigData;
 }U_ConfigData;
-/* Table used for fast programming */
-static const uint64_t Data64_To_Prog[FLASH_ROW_SIZE] = {
-  0x0000000000000000, 0x1111111111111111, 0x2222222222222222, 0x3333333333333333,
-  0x4444444444444444, 0x5555555555555555, 0x6666666666666666, 0x7777777777777777,
-  0x8888888888888888, 0x9999999999999999, 0xAAAAAAAAAAAAAAAA, 0xBBBBBBBBBBBBBBBB,
-  0xCCCCCCCCCCCCCCCC, 0xDDDDDDDDDDDDDDDD, 0xEEEEEEEEEEEEEEEE, 0xFFFFFFFFFFFFFFFF,
-  0x0011001100110011, 0x2233223322332233, 0x4455445544554455, 0x6677667766776677,
-  0x8899889988998899, 0xAABBAABBAABBAABB, 0xCCDDCCDDCCDDCCDD, 0xEEFFEEFFEEFFEEFF,
-  0x2200220022002200, 0x3311331133113311, 0x6644664466446644, 0x7755775577557755,
-  0xAA88AA88AA88AA88, 0xBB99BB99BB99BB99, 0xEECCEECCEECCEECC, 0xFFDDFFDDFFDDFFDD};
-
 static uint32_t GetBank(uint32_t Address);
 
 
@@ -93,8 +82,6 @@ static uint32_t GetBank(uint32_t Addr)
 
 int memory_driver_write(void)
 {
-	  uint32_t src_addr = (uint32_t)Data64_To_Prog;
-	  uint8_t data_index = 0;
 	  /* Erase the user Flash area
 	    (area defined by FLASH_USER_START_ADDR and FLASH_USER_END_ADDR) ***********/
 	  /* Unlock the Flash to enable the flash control register access *************/
@@ -158,8 +145,7 @@ int memory_driver_write(void)
 
 int memory_driver_read(void)
 {
-	  uint32_t src_addr = (uint32_t)Data64_To_Prog;
-	  uint8_t data_index = 0;
+	uint8_t data_index = 0;
 	  /* Unlock the Flash to enable the flash control register access *************/
 	  /* Program the user Flash area word by word
 	    (area defined by FLASH_USER_START_ADDR and FLASH_USER_END_ADDR) ***********/

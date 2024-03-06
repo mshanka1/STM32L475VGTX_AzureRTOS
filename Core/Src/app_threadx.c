@@ -24,7 +24,10 @@
 #include "stm_networking.h"
 #include "sntp_client.h"
 #include   "nxd_http_server.h"
-
+#include "board_wifi_init.h"
+#include "board_ble_init.h"
+#include "app_bluenrg_ms.h"
+#include "wifi.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -63,6 +66,7 @@ TX_THREAD tx_ble_thread;
 /* USER CODE BEGIN PFP */
 extern void thread_server_entry(ULONG);
 /* USER CODE END PFP */
+
 
 /**
   * @brief  Application ThreadX Initialization.
@@ -136,12 +140,14 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
 void tx_ble_thread_entry(ULONG thread_input)
 {
   /* USER CODE BEGIN tx_app_thread_entry */
-    UINT status;
+    //UINT status;
 
     printf("Starting Azure thread\r\n\r\n");
+    BLE_GPIO_Init();
     if(memory_driver_read()==1)
     {
-		MX_BlueNRG_MS_Init();
+    	//ble_gpio_init();
+    	MX_BlueNRG_MS_Init();
 		while(1){
 			MX_BlueNRG_MS_Process();
 			if(WiFi_PWD_Memory[0]!='\n')
@@ -150,11 +156,11 @@ void tx_ble_thread_entry(ULONG thread_input)
 			}
 		}
 		tx_thread_sleep(100);
-		HCI_TL_SPI_DeInit();
-		HCI_TL_SPI_Reset();
 		copy_data();
 		memory_driver_write();
     }
+	HCI_TL_SPI_DeInit();
+	HCI_TL_SPI_Reset();
     tx_semaphore_put(&tx_app_semaphore);
 
 	while(1)
@@ -181,6 +187,7 @@ void tx_app_thread_entry(ULONG thread_input)
     printf("Starting Azure thread\r\n\r\n");
 	//tx_thread_suspend(&tx_ble_thread);
     tx_semaphore_get(&tx_app_semaphore, TX_WAIT_FOREVER);
+    WIFI_IO_INIT();
 
 
     // Initialize the network

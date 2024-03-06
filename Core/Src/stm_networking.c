@@ -108,10 +108,10 @@ UINT  http_check_authentication(NX_HTTP_SERVER *server_ptr, UINT request_type,
 
 UINT http_request_notify(NX_HTTP_SERVER *server_ptr, UINT request_type,CHAR *resource, NX_PACKET *packet_ptr)
 {
-     char *cmd_string = (char*)(packet_ptr -> nx_packet_prepend_ptr);
-     unsigned int status;
+     //char *cmd_string = (char*)(packet_ptr -> nx_packet_prepend_ptr);
+     //unsigned int status;
      //UINT actual_size_count;
-     NX_PACKET *resp_packet_ptr = NULL;
+     //NX_PACKET *resp_packet_ptr = NULL;
      return(NX_HTTP_CALLBACK_COMPLETED);
 }
 static void print_address(CHAR* preable, uint8_t address[4])
