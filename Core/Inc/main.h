@@ -352,5 +352,5 @@ extern void copy_data(void);
 #ifdef __cplusplus
 }
 #endif
-//Version 1.1
+
 #endif /* __MAIN_H */
