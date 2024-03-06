@@ -76,7 +76,8 @@ void HAL_MspInit(void)
 
   /* USER CODE END MspInit 1 */
 }
-
+//mshanka1
+#if 0
 /**
 * @brief SPI MSP Initialization
 * This function configures the hardware resources used in this example
@@ -229,7 +230,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
   }
 
 }
-
+#endif
 /* USER CODE BEGIN 1 */
 
 /* USER CODE END 1 */

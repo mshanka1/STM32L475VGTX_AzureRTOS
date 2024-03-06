@@ -23,10 +23,17 @@ C_DEPS :=
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 AZURE_RTOS/App \
+BlueNRG_MS/App \
+BlueNRG_MS/Target \
 Core/Src \
 Core/Startup \
 Core/wifi_driver/inventek \
+Drivers/BSP/B-L475E-IOT01A2 \
 Drivers/STM32L4xx_HAL_Driver/Src \
+Middlewares/ST/BlueNRG-MS/hci/controller \
+Middlewares/ST/BlueNRG-MS/hci \
+Middlewares/ST/BlueNRG-MS/hci/hci_tl_patterns/Basic \
+Middlewares/ST/BlueNRG-MS/utils \
 Middlewares/ST/netxduo/addons/auto_ip \
 Middlewares/ST/netxduo/addons/cloud \
 Middlewares/ST/netxduo/addons/dhcp \

@@ -1,4 +1,3 @@
-#if 0
 /**************************************************************************/
 /*                                                                        */
 /*       Copyright (c) Microsoft Corporation. All rights reserved.        */
@@ -737,4 +736,3 @@ UINT        _nxe_web_http_server_authentication_check_set(NX_WEB_HTTP_SERVER *ht
 #endif
 
 #endif  /* NXD_HTTP_SERVER_H */
-#endif
