@@ -25,11 +25,14 @@ The board is capable of connecting the device with different wireless protocols 
 * Wi-Fi (Added WiFi Thread)
 * NFC (ToDo)
 * RF 915MHz (Todo)
+**1. New release version 1.1 on Mar-05-2024**
 
 # Available features:
-1. WIFI connectivity with hardcoded credentials
-2. NetxDuo configured
-3. HTTP server created and running
+1. WIFI connectivity with credentials stored in flash
+2. BLE enabled to receive wifi credentials from external device
+3. Flash feature to save the wifi credential into flash
+4. NetxDuo configured
+5. HTTP server created and running
 
 Next Steps:
 1. Create fully functional WiFi feature
