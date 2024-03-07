@@ -64,6 +64,10 @@
 *        discovered, but it is fixed only for this demo.
 */
 //#define RX_HANDLE   0x0014
+#define BLE_RECEVIVE_DATA_WIFI_SSID  0
+#define BLE_RECEVIVE_DATA_WIFI_PWD  1
+#define BLE_RECEVIVE_DATA_WIFI_MODE  2
+#define BLE_TX_DATA_NOTIFICATION 100
 
 /**
  * @}
@@ -74,7 +78,7 @@
  */
 tBleStatus Add_Sample_Service(void);
 void Make_Connection(void);
-void receiveData(uint8_t* data_buffer, uint8_t Nb_bytes);
+void ble_receiveData(uint8_t* data_buffer, uint8_t Nb_bytes,uint8_t option);
 void sendData(uint8_t* data_buffer, uint8_t Nb_bytes);
 void startReadTXCharHandle(void);
 void startReadRXCharHandle(void);

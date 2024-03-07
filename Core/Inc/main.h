@@ -344,6 +344,8 @@ void Error_Handler(void);
 /* USER CODE END Private defines */
 extern char WiFi_SSID_Memory[];
 extern char WiFi_PWD_Memory[];
+extern int WiFi_Select_Mode;
+extern __IO uint32_t MemoryProgramStatus;
 extern void ble_gpio_init(void);
 extern int memory_driver_read(void);
 extern int memory_driver_write(void);

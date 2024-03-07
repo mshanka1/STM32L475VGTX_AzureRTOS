@@ -52,7 +52,7 @@ volatile uint8_t end_read_rx_char_handle = FALSE;
 uint16_t tx_handle;
 uint16_t rx_handle;
 
-uint16_t sampleServHandle, TXCharHandle, RXCharHandle;
+uint16_t sampleServHandle, TXCharHandle, RXCharHandle, RXWiFiSSIDCharHandle,RXWIFIPWDCharHandle;//mshanka1
 
 extern uint8_t bnrg_expansion_board;
 extern BLE_RoleTypeDef BLE_Role;
@@ -99,8 +99,8 @@ tBleStatus Add_Sample_Service(void)
   const uint8_t service_uuid[16] = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x96,0x9e,0xe2,0x11,0x9e,0xb1,0xe0,0xf2,0x73,0xd9};
   const uint8_t charUuidTX[16] = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x96,0x9e,0xe2,0x11,0x9e,0xb1,0xe1,0xf2,0x73,0xd9};
   const uint8_t charUuidRX[16] = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x96,0x9e,0xe2,0x11,0x9e,0xb1,0xe2,0xf2,0x73,0xd9};
-  const uint8_t wifissidTX[16] = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x96,0x9e,0xe2,0x11,0x9e,0xb1,0xe3,0xf2,0x73,0xd9};
-  const uint8_t wifissidRX[16] = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x96,0x9e,0xe2,0x11,0x9e,0xb1,0xe4,0xf2,0x73,0xd9};
+  const uint8_t wifissidRX[16] = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x96,0x9e,0xe2,0x11,0x9e,0xb1,0xe3,0xf2,0x73,0xd9};
+  const uint8_t wifipwddRX[16] = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x96,0x9e,0xe2,0x11,0x9e,0xb1,0xe4,0xf2,0x73,0xd9};
 
   ret = aci_gatt_add_serv(UUID_TYPE_128, service_uuid, PRIMARY_SERVICE, 10, &sampleServHandle); /* original is 9?? */
   if (ret != BLE_STATUS_SUCCESS) goto fail;
@@ -113,12 +113,12 @@ tBleStatus Add_Sample_Service(void)
                            16, 1, &RXCharHandle);
   if (ret != BLE_STATUS_SUCCESS) goto fail;
 
-  ret =  aci_gatt_add_char(sampleServHandle, UUID_TYPE_128, wifissidTX, 20, CHAR_PROP_NOTIFY, ATTR_PERMISSION_NONE, 0,
-                           16, 1, &TXCharHandle);
+  ret =  aci_gatt_add_char(sampleServHandle, UUID_TYPE_128, wifissidRX, 20, CHAR_PROP_WRITE|CHAR_PROP_WRITE_WITHOUT_RESP, ATTR_PERMISSION_NONE, GATT_NOTIFY_ATTRIBUTE_WRITE,
+                           16, 1, &RXWiFiSSIDCharHandle);
   if (ret != BLE_STATUS_SUCCESS) goto fail;
 
-  ret =  aci_gatt_add_char(sampleServHandle, UUID_TYPE_128, wifissidRX, 20, CHAR_PROP_WRITE|CHAR_PROP_WRITE_WITHOUT_RESP, ATTR_PERMISSION_NONE, GATT_NOTIFY_ATTRIBUTE_WRITE,
-                           16, 1, &RXCharHandle);
+  ret =  aci_gatt_add_char(sampleServHandle, UUID_TYPE_128, wifipwddRX, 20, CHAR_PROP_WRITE|CHAR_PROP_WRITE_WITHOUT_RESP, ATTR_PERMISSION_NONE, GATT_NOTIFY_ATTRIBUTE_WRITE,
+                           16, 1, &RXWIFIPWDCharHandle);
   if (ret != BLE_STATUS_SUCCESS) goto fail;
   PRINTF("Sample Service added.\nTX Char Handle %04X, RX Char Handle %04X\n", TXCharHandle, RXCharHandle);
   return BLE_STATUS_SUCCESS;
@@ -220,24 +220,42 @@ void startReadRXCharHandle(void)
  * @param  Nb_bytes : number of bytes to be received
  * @retval None
  */
-void receiveData(uint8_t* data_buffer, uint8_t Nb_bytes)
+void receiveData(uint8_t* data_buffer, uint8_t Nb_bytes,uint8_t option)
 {
   BSP_LED_Toggle(LED2);
-  if(WiFi_SSID_Memory[0]=='\n')
+  if(option == BLE_RECEVIVE_DATA_WIFI_SSID)
   {
+	  memset(WiFi_SSID_Memory,'\n',20*sizeof(uint8_t));
 	  for(int i = 0; i < Nb_bytes; i++) {
-	    printf("%c", data_buffer[i]);
-	    WiFi_SSID_Memory[i] = data_buffer[i];
+		printf("%c", data_buffer[i]);
+		WiFi_SSID_Memory[i] = data_buffer[i];
 	  }
+	  MemoryProgramStatus=1;
+
   }
-  else if(WiFi_PWD_Memory[0]=='\n')
+  if(option == BLE_RECEVIVE_DATA_WIFI_PWD)
   {
+	  memset(WiFi_PWD_Memory,'\n',50*sizeof(uint8_t));
 	  for(int i = 0; i < Nb_bytes; i++) {
-	    printf("%c", data_buffer[i]);
-	    WiFi_PWD_Memory[i] = data_buffer[i];
+		printf("%c", data_buffer[i]);
+		WiFi_PWD_Memory[i] = data_buffer[i];
 	  }
+	  MemoryProgramStatus=1;
   }
 
+  if(option == BLE_RECEVIVE_DATA_WIFI_MODE)
+  {
+	  WiFi_Select_Mode = data_buffer[0];
+	  MemoryProgramStatus=1;
+  }
+  if(option == BLE_TX_DATA_NOTIFICATION)
+  {
+	  for(int i = 0; i < Nb_bytes; i++) {
+		printf("%c", data_buffer[i]);
+		data_buffer[i] = data_buffer[i];
+	  }
+
+  }
   fflush(stdout);
 }
 
@@ -251,7 +269,7 @@ void receiveData(uint8_t* data_buffer, uint8_t Nb_bytes)
 void sendData(uint8_t* data_buffer, uint8_t Nb_bytes)
 {
   if(BLE_Role == SERVER) {
-    aci_gatt_update_char_value(sampleServHandle,TXCharHandle, 0, Nb_bytes, data_buffer);
+    aci_gatt_update_char_value(sampleServHandle,TXCharHandle, 0, Nb_bytes, data_buffer);//TXCharHandle mshanka1
   }
   else {
     aci_gatt_write_without_response(connection_handle, rx_handle+1, Nb_bytes, data_buffer);
@@ -286,8 +304,14 @@ void enableNotification(void)
 void Attribute_Modified_CB(uint16_t handle, uint8_t data_length, uint8_t *att_data)
 {
   if(handle == RXCharHandle + 1){
-    receiveData(att_data, data_length);
-  } else if (handle == TXCharHandle + 2) {
+    receiveData(att_data, data_length,BLE_RECEVIVE_DATA_WIFI_SSID);
+  }
+  else if(handle == RXWiFiSSIDCharHandle + 1){
+    receiveData(att_data, data_length,BLE_RECEVIVE_DATA_WIFI_PWD);//mshanka1
+  }
+  else if(handle == RXWIFIPWDCharHandle + 1){
+    receiveData(att_data, data_length,BLE_RECEVIVE_DATA_WIFI_MODE);
+  }  else if (handle == TXCharHandle + 2) {
     if(att_data[0] == 0x01)
       notification_enabled = TRUE;
   }
@@ -340,7 +364,7 @@ void GAP_DisconnectionComplete_CB(void)
 void GATT_Notification_CB(uint16_t attr_handle, uint8_t attr_len, uint8_t *attr_value)
 {
   if (attr_handle == tx_handle+1) {
-    receiveData(attr_value, attr_len);
+    receiveData(attr_value, attr_len,BLE_TX_DATA_NOTIFICATION);
   }
 }
 

@@ -144,7 +144,7 @@ void tx_ble_thread_entry(ULONG thread_input)
 
     printf("Starting Azure thread\r\n\r\n");
     BLE_GPIO_Init();
-    if(memory_driver_read()==1)
+    if(memory_driver_read()==1) //mshanka1
     {
     	//ble_gpio_init();
     	MX_BlueNRG_MS_Init();

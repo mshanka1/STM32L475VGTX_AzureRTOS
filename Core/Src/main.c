@@ -31,6 +31,7 @@
 
 char WiFi_SSID_Memory[20]={'\n'};
 char WiFi_PWD_Memory[50]={'\n'};
+int WiFi_Select_Mode = 3;
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
