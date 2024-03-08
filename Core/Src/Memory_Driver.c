@@ -179,8 +179,32 @@ int memory_driver_read(void)
 	  if (MemoryProgramStatus == 0)
 	  {
 	    /* No error detected. Switch on LED1*/
-		  memcpy(&WiFi_SSID_Memory,U_ConfigData.ConfigData.wifi_ssid_memory,sizeof(char)*20);
-		  memcpy(&WiFi_PWD_Memory,U_ConfigData.ConfigData.wifi_pwd_memory,sizeof(char)*20);
+		  //memcpy(&WiFi_SSID_Memory,U_ConfigData.ConfigData.wifi_ssid_memory,sizeof(char)*20);
+		  //memcpy(&WiFi_PWD_Memory,U_ConfigData.ConfigData.wifi_pwd_memory,sizeof(char)*20);
+		  for(int i=0;i<20;i++)
+		  {
+			  if((U_ConfigData.ConfigData.wifi_ssid_memory[i]=='\n')||(U_ConfigData.ConfigData.wifi_ssid_memory[i]=='\0'))
+			  {
+				  WiFi_SSID_Memory[i]='\0';
+				  break;
+			  }
+			  else
+			  {
+				  WiFi_SSID_Memory[i]=U_ConfigData.ConfigData.wifi_ssid_memory[i];
+			  }
+		  }
+		  for(int i=0;i<50;i++)
+		  {
+			  if((U_ConfigData.ConfigData.wifi_pwd_memory[i]=='\n')||(U_ConfigData.ConfigData.wifi_pwd_memory[i]=='\0'))
+			  {
+				  WiFi_PWD_Memory[i]='\0';
+				  break;
+			  }
+			  else
+			  {
+				  WiFi_PWD_Memory[i]=U_ConfigData.ConfigData.wifi_pwd_memory[i];
+			  }
+		  }
 		  WiFi_Select_Mode = U_ConfigData.ConfigData.WiFi_Select_Mode;
 
 	  	  return 0;

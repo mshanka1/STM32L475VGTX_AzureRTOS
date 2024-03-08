@@ -230,7 +230,7 @@ void receiveData(uint8_t* data_buffer, uint8_t Nb_bytes,uint8_t option)
 		printf("%c", data_buffer[i]);
 		WiFi_SSID_Memory[i] = data_buffer[i];
 	  }
-	  MemoryProgramStatus=1;
+	  //MemoryProgramStatus=1;
 
   }
   if(option == BLE_RECEVIVE_DATA_WIFI_PWD)
@@ -240,7 +240,7 @@ void receiveData(uint8_t* data_buffer, uint8_t Nb_bytes,uint8_t option)
 		printf("%c", data_buffer[i]);
 		WiFi_PWD_Memory[i] = data_buffer[i];
 	  }
-	  MemoryProgramStatus=1;
+	  //MemoryProgramStatus=1;
   }
 
   if(option == BLE_RECEVIVE_DATA_WIFI_MODE)
