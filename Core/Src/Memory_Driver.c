@@ -32,6 +32,7 @@ union UT_FALSH_DATA
 
 		uint8_t  wifi_ssid_memory[20];                                          /**< The currently selected protocol */
 		uint8_t  wifi_pwd_memory[50];                                          /**< The currently selected protocol */
+		int 	WiFi_Select_Mode;
 	}ConfigData;
 }U_ConfigData;
 static uint32_t GetBank(uint32_t Address);
@@ -178,8 +179,34 @@ int memory_driver_read(void)
 	  if (MemoryProgramStatus == 0)
 	  {
 	    /* No error detected. Switch on LED1*/
-		  memcpy(&WiFi_SSID_Memory,U_ConfigData.ConfigData.wifi_ssid_memory,sizeof(char)*20);
-		  memcpy(&WiFi_PWD_Memory,U_ConfigData.ConfigData.wifi_pwd_memory,sizeof(char)*20);
+		  //memcpy(&WiFi_SSID_Memory,U_ConfigData.ConfigData.wifi_ssid_memory,sizeof(char)*20);
+		  //memcpy(&WiFi_PWD_Memory,U_ConfigData.ConfigData.wifi_pwd_memory,sizeof(char)*20);
+		  for(int i=0;i<20;i++)
+		  {
+			  if((U_ConfigData.ConfigData.wifi_ssid_memory[i]=='\n')||(U_ConfigData.ConfigData.wifi_ssid_memory[i]=='\0'))
+			  {
+				  WiFi_SSID_Memory[i]='\0';
+				  break;
+			  }
+			  else
+			  {
+				  WiFi_SSID_Memory[i]=U_ConfigData.ConfigData.wifi_ssid_memory[i];
+			  }
+		  }
+		  for(int i=0;i<50;i++)
+		  {
+			  if((U_ConfigData.ConfigData.wifi_pwd_memory[i]=='\n')||(U_ConfigData.ConfigData.wifi_pwd_memory[i]=='\0'))
+			  {
+				  WiFi_PWD_Memory[i]='\0';
+				  break;
+			  }
+			  else
+			  {
+				  WiFi_PWD_Memory[i]=U_ConfigData.ConfigData.wifi_pwd_memory[i];
+			  }
+		  }
+		  WiFi_Select_Mode = U_ConfigData.ConfigData.WiFi_Select_Mode;
+
 	  	  return 0;
 	  }
 	  else
@@ -196,5 +223,6 @@ void copy_data(void)
 	  U_ConfigData.ConfigData.MagicNumber = 0xABCD;
 	  memcpy(&U_ConfigData.ConfigData.wifi_ssid_memory,&WiFi_SSID_Memory,sizeof(char)*20);
 	  memcpy(&U_ConfigData.ConfigData.wifi_pwd_memory,&WiFi_PWD_Memory,sizeof(char)*20);
+	  U_ConfigData.ConfigData.WiFi_Select_Mode = WiFi_Select_Mode;
 
 }

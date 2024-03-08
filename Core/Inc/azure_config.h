@@ -18,10 +18,11 @@ typedef enum
 
 extern char WiFi_SSID_Memory[];
 extern char WiFi_PWD_Memory[];
+extern int WiFi_Select_Mode;
 
 #define WIFI_SSID     WiFi_SSID_Memory
 #define WIFI_PASSWORD WiFi_PWD_Memory
-#define WIFI_MODE     WPA2_PSK_AES
+#define WIFI_MODE     WiFi_Select_Mode
 
 // ----------------------------------------------------------------------------
 // Azure IoT Dynamic Provisioning Service

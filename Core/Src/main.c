@@ -29,8 +29,9 @@
 
 /* USER CODE END Includes */
 
-char WiFi_SSID_Memory[20]={'\n'};
-char WiFi_PWD_Memory[50]={'\n'};
+char WiFi_SSID_Memory[20];
+char WiFi_PWD_Memory[50];
+int WiFi_Select_Mode = 3;
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
