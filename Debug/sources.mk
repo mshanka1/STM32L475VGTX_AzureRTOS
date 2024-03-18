@@ -45,6 +45,7 @@ Middlewares/ST/netxduo/addons/nat \
 Middlewares/ST/netxduo/addons/ppp \
 Middlewares/ST/netxduo/addons/sntp \
 Middlewares/ST/netxduo/addons/web \
+Middlewares/ST/netxduo/addons/websocket \
 Middlewares/ST/netxduo/common/src \
 Middlewares/ST/threadx/common/src \
 Middlewares/ST/threadx/ports/cortex_m4/gnu/src \

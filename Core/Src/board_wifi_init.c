@@ -7,6 +7,7 @@
 
 #include "board_wifi_init.h"
 #include "main.h"
+#include "es_wifi_io.h"
 /* Private variables ---------------------------------------------------------*/
 //_nx_ip_status_check --> check
 /* USER CODE BEGIN PV */

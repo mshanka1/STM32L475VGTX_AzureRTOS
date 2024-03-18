@@ -15,5 +15,6 @@ extern NX_DNS nx_dns_client;
 
 UINT stm_network_init(CHAR* ssid, CHAR* password, WiFi_Mode mode);
 UINT stm_network_connect();
+UINT stm_mqtt_pubsub();
 
 #endif // _NETWORKING_H
