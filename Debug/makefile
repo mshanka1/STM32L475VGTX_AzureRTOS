@@ -14,6 +14,7 @@ RM := rm -rf
 -include Middlewares/ST/threadx/ports/cortex_m4/gnu/src/subdir.mk
 -include Middlewares/ST/threadx/common/src/subdir.mk
 -include Middlewares/ST/netxduo/common/src/subdir.mk
+-include Middlewares/ST/netxduo/addons/websocket/subdir.mk
 -include Middlewares/ST/netxduo/addons/web/subdir.mk
 -include Middlewares/ST/netxduo/addons/sntp/subdir.mk
 -include Middlewares/ST/netxduo/addons/ppp/subdir.mk

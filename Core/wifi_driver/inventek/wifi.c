@@ -187,7 +187,14 @@ WIFI_Status_t WIFI_GetGateway_Address (uint8_t  *Gateway_addr)
 WIFI_Status_t WIFI_GetDNS_Address (uint8_t  *DNS1addr,uint8_t  *DNS2addr)
 {
   WIFI_Status_t ret = WIFI_STATUS_ERROR; 
-  
+  /*EsWifiObj.NetSettings.DNS1[0]=8;
+  EsWifiObj.NetSettings.DNS1[1]=8;
+  EsWifiObj.NetSettings.DNS1[2]=8;
+  EsWifiObj.NetSettings.DNS1[3]=8;
+  EsWifiObj.NetSettings.DNS2[0]=8;
+  EsWifiObj.NetSettings.DNS2[1]=8;
+  EsWifiObj.NetSettings.DNS2[2]=8;
+  EsWifiObj.NetSettings.DNS2[3]=8;*/
   if(EsWifiObj.NetSettings.IsConnected)
   {
     memcpy(DNS1addr, EsWifiObj.NetSettings.DNS1, 4);

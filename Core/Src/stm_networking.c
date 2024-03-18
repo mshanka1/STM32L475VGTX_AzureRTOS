@@ -1,6 +1,6 @@
 /* Copyright (c) Microsoft Corporation.
    Licensed under the MIT License. */
-
+#include <inttypes.h>
 #include "stm_networking.h"
 
 #include "nx_api.h"
@@ -17,7 +17,9 @@
 #include    "filex_stub.h"
 #endif
 
+#include "nxd_dhcp_client.h"
 #include   "nxd_http_server.h"
+#include "nxd_mqtt_client.h"
 
 #define NETX_IP_STACK_SIZE 8192
 #define NETX_PACKET_COUNT  20
@@ -27,6 +29,7 @@
 #define NETX_IPV4_ADDRESS IP_ADDRESS(0, 0, 0, 0)
 #define NETX_IPV4_MASK    IP_ADDRESS(255, 255, 255, 0)
 #define HTTP_SERVER_ADDRESS  IP_ADDRESS(1,2,3,4)
+#define MQTT_SERVER_ADDRESS  IP_ADDRESS(0, 0, 0, 0)
 
 
 static UCHAR netx_ip_stack[NETX_IP_STACK_SIZE];
@@ -38,9 +41,12 @@ static WIFI_Ecn_t netx_mode;
 static ULONG     ip_status;
 
 
+NX_DHCP   my_dhcp;
+char  my_dhcp_name[]          = "SHANKAR";
 NX_IP nx_ip;
 NX_PACKET_POOL nx_pool ;
 NX_DNS nx_dns_client;
+ULONG           host_ip_address;
 /* Define the ARP cache area.  */
 ULONG             arp_space_area[512 / sizeof(ULONG)];
 //http server
@@ -103,7 +109,66 @@ UINT  http_check_authentication(NX_HTTP_SERVER *server_ptr, UINT request_type,
     /* Request basic authentication.  */
     return(NX_HTTP_BASIC_AUTHENTICATE);
 }
+/////////MQTT///////////////////////////////////
+#define  MQTT_CLIENT_ID_STRING           "mytestclient"
+#define  MQTT_CLIENT_STACK_SIZE     4096
 
+#define  STRLEN(p)                  (sizeof(p) - 1)
+
+
+/* Declare the MQTT thread stack space. */
+static ULONG                        mqtt_client_stack[MQTT_CLIENT_STACK_SIZE / sizeof(ULONG)];
+
+/* Declare the MQTT client control block. */
+static NXD_MQTT_CLIENT              mqtt_client;
+
+/* Define the symbol for signaling a received message. */
+
+
+/* Define the test threads.  */
+#define TOPIC_NAME                  "topic"
+#define MESSAGE_STRING              "This is a message. "
+
+#define  MQTT_LOCAL_SERVER_ADDRESS (IP_ADDRESS(10, 0, 0, 15))
+/* Define the priority of the MQTT internal thread. */
+#define MQTT_THREAD_PRIORTY         12
+
+/* Define the MQTT keep alive timer for 5 minutes */
+#define MQTT_KEEP_ALIVE_TIMER       300
+
+#define QOS0                        0
+#define QOS1                        1
+
+/* Declare event flag, which is used in this demo. */
+TX_EVENT_FLAGS_GROUP                mqtt_app_flag;
+#define MQTT_DEMO_MESSAGE_EVENT          1
+#define MQTT_DEMO_ALL_EVENTS             3
+
+NXD_ADDRESS mqtt_server_ip;
+ULONG           host_mqtt_ip_address;
+
+/* Declare buffers to hold message and topic. */
+static UCHAR MQTT_message_buffer[NXD_MQTT_MAX_MESSAGE_LENGTH];
+static UCHAR MQTT_topic_buffer[NXD_MQTT_MAX_TOPIC_NAME_LENGTH];
+
+/* Declare the disconnect notify function. */
+static VOID MQTT_my_disconnect_func(NXD_MQTT_CLIENT *client_ptr)
+{
+    NX_PARAMETER_NOT_USED(client_ptr);
+    printf("client disconnected from server\n");
+}
+
+
+static VOID MQTT_my_notify_func(NXD_MQTT_CLIENT* client_ptr, UINT number_of_messages)
+{
+    NX_PARAMETER_NOT_USED(client_ptr);
+    NX_PARAMETER_NOT_USED(number_of_messages);
+    tx_event_flags_set(&mqtt_app_flag, MQTT_DEMO_MESSAGE_EVENT, TX_OR);
+    return;
+
+}
+
+//////////MQTT START////////////////////////////
 /*===========================================================================*/
 
 UINT http_request_notify(NX_HTTP_SERVER *server_ptr, UINT request_type,CHAR *resource, NX_PACKET *packet_ptr)
@@ -247,13 +312,11 @@ static UINT dns_connect()
     {
         printf("ERROR: nx_dns_server_remove_all (0x%08x)\r\n", status);
     }
-
-    else if ((status = nx_dns_server_add(
-                  &nx_dns_client, IP_ADDRESS(dns_address_1[0], dns_address_1[1], dns_address_1[2], dns_address_1[3]))))
+    else if (status = nx_dns_server_add(&nx_dns_client, IP_ADDRESS(dns_address_1[0], dns_address_1[1], dns_address_1[2], dns_address_1[3])))
     {
         printf("ERROR: nx_dns_server_add (0x%08x)\r\n", status);
-    }
 
+     }
     else if ((status = nx_dns_server_add(
                   &nx_dns_client, IP_ADDRESS(dns_address_2[0], dns_address_2[1], dns_address_2[2], dns_address_2[3]))))
     {
@@ -263,7 +326,6 @@ static UINT dns_connect()
     {
         printf("SUCCESS: DNS client initialized\r\n");
     }
-
     return status;
 }
 
@@ -272,6 +334,8 @@ UINT stm_network_init(CHAR* ssid, CHAR* password, WiFi_Mode mode)
     UINT status;
     ULONG     ip_address;
     ULONG     network_mask;
+    //ULONG events;
+    //UINT topic_length, message_length;
 
     // Stash WiFi credentials
     netx_ssid     = ssid;
@@ -376,6 +440,8 @@ UINT stm_network_init(CHAR* ssid, CHAR* password, WiFi_Mode mode)
         printf("ERROR: nx_dns_create (0x%08x)\r\n", status);
     }
 
+
+
     // Use the packet pool here
 #ifdef NX_DNS_CLIENT_USER_CREATE_PACKET_POOL
     if ((status = nx_dns_packet_pool_set(&nx_dns_client, nx_ip.nx_ip_default_packet_pool)))
@@ -401,6 +467,10 @@ UINT stm_network_init(CHAR* ssid, CHAR* password, WiFi_Mode mode)
     } while(status != TX_SUCCESS);
 
     /* Create the DHCP instance */
+    if(status = nx_dhcp_create(&my_dhcp, &nx_ip, my_dhcp_name))
+    {
+    	printf("ERROR: Failed to create dhcp client (0x%08x)\r\n", status);
+    }
     //create_dhcp_client();
 
     /* Set the network_enabled flag */
@@ -409,34 +479,112 @@ UINT stm_network_init(CHAR* ssid, CHAR* password, WiFi_Mode mode)
     {
     	printf("ERROR: Failed to connect to network (0x%08x)\r\n", status);
     }
+    nx_dhcp_stop(&my_dhcp);
+    nx_dhcp_reinitialize(&my_dhcp);
+    nx_dhcp_start(&my_dhcp);
+    do
+    {
+      /* Wait for the link to become ready */
+      status = nx_ip_status_check(&nx_ip, NX_IP_ADDRESS_RESOLVED, &ip_status, 100);
+    } while(status != TX_SUCCESS);
     if(status =  nx_ip_address_get(&nx_ip, &ip_address, &network_mask))
     {
     	printf("ERROR: Failed to get ip (0x%08x)\r\n", status);
     }
 
-    /* Create the HTTP Server.  */
-    if(status = nx_http_server_create(&my_server, "Shankar HTTP Server", &nx_ip,&ram_disk,
-                          (ULONG*)http_server_stack_area, sizeof(http_server_stack_area), &nx_pool, http_check_authentication, http_request_notify))
+    if(status = nxd_mqtt_client_create(&mqtt_client, "my_client", MQTT_CLIENT_ID_STRING, STRLEN(MQTT_CLIENT_ID_STRING),
+    							&nx_ip,
+								&nx_pool,
+								(VOID*)mqtt_client_stack,
+								sizeof(mqtt_client_stack),
+                                    MQTT_THREAD_PRIORTY, NX_NULL, 0))
     {
-    	nx_http_server_delete(&my_server);
-    	printf("ERROR: Failed to create http server (0x%08x)\r\n", status);
+    	printf("Error in creating MQTT client: 0x%02x\n", status);
     }
 
-    /* OK to start the HTTP Server.   */
-    if(status = nx_http_server_start(&my_server))
-    {
-    	printf("ERROR: Failed to start http server (0x%08x)\r\n", status);
-    }
-#if 0
-    // Initialize TLS
-    else
-    {
-        nx_secure_tls_initialize();
-    }
-#endif
     return status;
 }
 
+/*MQTT API
+ *
+ */
+UINT stm_mqtt_pubsub()
+{
+    UINT status;
+    ULONG events;
+    UINT topic_length, message_length;
+
+    if(host_ip_address==0)
+    {
+		if(WIFI_GetHostAddress("xyz",&host_ip_address) != WIFI_STATUS_OK)
+		{
+			printf("ERROR: WIFI_GetDNS_Address\r\n");
+			return NX_NOT_SUCCESSFUL;
+		}
+    }
+    host_ip_address=__builtin_bswap32(host_ip_address);
+#ifdef NXD_MQTT_OVER_WEBSOCKET
+    status = nxd_mqtt_client_websocket_set(&mqtt_client, (UCHAR *)"test.mosquitto.org", sizeof("test.mosquitto.org") - 1,
+                                           (UCHAR *)"/mqtt", sizeof("/mqtt") - 1);
+    if (status)
+    {
+        printf("Error in setting MQTT over WebSocket: 0x%02x\r\n", status);
+        //error_counter++;
+    }
+#endif /* NXD_MQTT_OVER_WEBSOCKET */
+
+    /* Register the disconnect notification function. */
+    nxd_mqtt_client_disconnect_notify_set(&mqtt_client, MQTT_my_disconnect_func);
+
+    /* Create an event flag for this demo. */
+    status = tx_event_flags_create(&mqtt_app_flag, "my app event");
+
+
+    mqtt_server_ip.nxd_ip_version = 4;
+    mqtt_server_ip.nxd_ip_address.v4 = host_ip_address;//MQTT_LOCAL_SERVER_ADDRESS;//
+
+
+    /* Start the connection to the server. */
+    status = nxd_mqtt_client_login_set(&mqtt_client,"xyz", strlen("xyz"),"xyz",strlen("xyz"));
+    status = nxd_mqtt_client_connect(&mqtt_client, &mqtt_server_ip, NXD_MQTT_PORT,
+                                     MQTT_KEEP_ALIVE_TIMER, 0, NX_WAIT_FOREVER);
+
+    /* Subscribe to the topic with QoS level 0. */
+    status = nxd_mqtt_client_subscribe(&mqtt_client, TOPIC_NAME, STRLEN(TOPIC_NAME), QOS0);
+
+    /* Set the receive notify function. */
+    status = nxd_mqtt_client_receive_notify_set(&mqtt_client, MQTT_my_notify_func);
+
+    /* Publish a message with QoS Level 1. */
+    status = nxd_mqtt_client_publish(&mqtt_client, TOPIC_NAME, STRLEN(TOPIC_NAME),
+                                     (CHAR*)MESSAGE_STRING, STRLEN(MESSAGE_STRING), 0, QOS1, NX_WAIT_FOREVER);
+
+
+    /* Now wait for the broker to publish the message. */
+
+    tx_event_flags_get(&mqtt_app_flag, MQTT_DEMO_ALL_EVENTS, TX_OR_CLEAR, &events, TX_WAIT_FOREVER);
+    if(events & MQTT_DEMO_MESSAGE_EVENT)
+    {
+        status = nxd_mqtt_client_message_get(&mqtt_client, MQTT_topic_buffer, sizeof(MQTT_topic_buffer), &topic_length,
+                                             MQTT_message_buffer, sizeof(MQTT_message_buffer), &message_length);
+        if(status == NXD_MQTT_SUCCESS)
+        {
+            MQTT_topic_buffer[topic_length] = 0;
+            MQTT_message_buffer[message_length] = 0;
+            printf("topic = %s, message = %s\n", MQTT_topic_buffer, MQTT_message_buffer);
+        }
+    }
+
+    /* Now unsubscribe the topic. */
+    nxd_mqtt_client_unsubscribe(&mqtt_client, TOPIC_NAME, STRLEN(TOPIC_NAME));
+    /* Disconnect from the broker. */
+	nxd_mqtt_client_disconnect(&mqtt_client);
+
+	/* Delete the client instance, release all the resources. */
+	nxd_mqtt_client_delete(&mqtt_client);
+    return status;
+
+}
 UINT stm_network_connect()
 {
     UINT status;

@@ -26,7 +26,10 @@ The board is capable of connecting the device with different wireless protocols 
 * NFC (ToDo)
 * RF 915MHz (Todo)
 **1. New release version 1.1 on Mar-05-2024**
+<<<<<<< HEAD
   **2. Issue fix release**
+=======
+>>>>>>> master
 
 # Available features:
 1. WIFI connectivity with credentials stored in flash

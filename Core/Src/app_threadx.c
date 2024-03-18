@@ -199,6 +199,11 @@ void tx_app_thread_entry(ULONG thread_input)
         	//restart system
         }
     }
+    do{
+    	stm_mqtt_pubsub();
+    	tx_thread_sleep(100);
+
+    }while(!status);
 
     //else if ((status = http_server_entry(&nx_ip, &nx_pool, &nx_dns_client, sntp_time)))
     //{
