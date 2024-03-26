@@ -9,7 +9,7 @@
 #include "nxd_dns.h"
 
 #include "wifi.h"
-
+#include "WebServer.h"
 #include "sntp_client.h"
 #ifndef      NX_HTTP_NO_FILEX
 #include    "fx_api.h"
@@ -69,7 +69,13 @@ UCHAR           ram_disk_memory[32000];
 FX_MEDIA        ram_disk;
 unsigned char   media_memory[512];
 ULONG           http_server_stack_area[1024];
-
+/////global wifi vareables///////
+uint8_t wifi_mac[6];
+UCHAR wifi_ip_address[4];
+UCHAR wifi_ip_mask[4];
+UCHAR wifi_gateway_address[4];
+UCHAR wifi_dns_address_1[4];
+UCHAR wifi_dns_address_2[4];
 
 /* Define device drivers.  */
 extern void _fx_ram_driver(FX_MEDIA *media_ptr);
@@ -96,18 +102,19 @@ static const UINT wifi_required_version[] = {3, 5, 2, 7};
 UINT  http_check_authentication(NX_HTTP_SERVER *server_ptr, UINT request_type,
             CHAR *resource, CHAR **name, CHAR **password, CHAR **realm)
 {
-    NX_PARAMETER_NOT_USED(server_ptr);
-    NX_PARAMETER_NOT_USED(request_type);
-    NX_PARAMETER_NOT_USED(resource);
+//    NX_PARAMETER_NOT_USED(server_ptr);
+//    NX_PARAMETER_NOT_USED(request_type);
+//    NX_PARAMETER_NOT_USED(resource);
 
     /* Just use a simple name, password, and realm for all
        requests and resources.  */
-    *name =     "name";
-    *password = "password";
-    *realm =    "NetX Duo HTTP demo";
+//    *name =     "name";
+//    *password = "password";
+//    *realm =    "NetX Duo HTTP demo";
 
     /* Request basic authentication.  */
-    return(NX_HTTP_BASIC_AUTHENTICATE);
+//    return(NX_HTTP_BASIC_AUTHENTICATE);
+	return(NX_SUCCESS);
 }
 /////////MQTT///////////////////////////////////
 #define  MQTT_CLIENT_ID_STRING           "mytestclient"
@@ -131,7 +138,7 @@ static NXD_MQTT_CLIENT              mqtt_client;
 
 #define  MQTT_LOCAL_SERVER_ADDRESS (IP_ADDRESS(10, 0, 0, 15))
 /* Define the priority of the MQTT internal thread. */
-#define MQTT_THREAD_PRIORTY         12
+#define MQTT_THREAD_PRIORTY         13
 
 /* Define the MQTT keep alive timer for 5 minutes */
 #define MQTT_KEEP_ALIVE_TIMER       300
@@ -173,11 +180,73 @@ static VOID MQTT_my_notify_func(NXD_MQTT_CLIENT* client_ptr, UINT number_of_mess
 
 UINT http_request_notify(NX_HTTP_SERVER *server_ptr, UINT request_type,CHAR *resource, NX_PACKET *packet_ptr)
 {
-     //char *cmd_string = (char*)(packet_ptr -> nx_packet_prepend_ptr);
-     //unsigned int status;
-     //UINT actual_size_count;
-     //NX_PACKET *resp_packet_ptr = NULL;
-     return(NX_HTTP_CALLBACK_COMPLETED);
+	unsigned int status;
+    NX_PACKET *resp_packet_ptr = NULL;
+    /** \brief static array holding the stylesheet.css file used on the webpage */
+     unsigned const char style_sheet_css[] = {"BODY {margin-top: 0px;margin-left: 10pt;color: #000000;background-color: #eaeaea; font-size : 10pt;line-height : 11pt;font-family : Arial, Helvetica, sans-serif;}"
+                                         "TH   {margin-top: 0px;margin-bottom: 0px;font-size : 10pt;line-height : 11pt;}"
+                                         "TD   {margin-top: 0px;margin-bottom: 0px;font-size : 10pt;line-height : 11pt;}"
+                                         "H1   {margin-top: 7pt;margin-bottom: 3pt;font-size : 14pt;line-height : 14pt;}"
+                                         "H2   {margin-top: 8pt;margin-bottom: 6pt;font-size : 12pt;line-height : 12pt;}"};
+
+     if(strcmp(resource,"/") == 0)
+   {
+     /* Found it, override the GET processing by sending the resource
+     contents directly. */
+     //nx_http_server_callback_data_send(server_ptr,
+     //"HTTP/1.0 200 \r\nContent-Length: 103\r\nContent-Type: text/html\r\n\r\n", 63);
+     //nx_http_server_callback_data_send(server_ptr, "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\">\n<html>\n<head><title>Shankar IOT</title><meta http-equiv=""content-type"" content=""text/html; charset=ISO-8859-1"">\n<link rel=""icon"" type=""image/ico"" href=""/favicon.ico""/>\n</head>\n<frameset rows=""193,*"" border=""0""/>\n<frame src=""/top.html"" name=""header"" noresize=""noresize"" scrolling=""no""/>\n<frameset cols=""243,*"" border=""0""/>\n<frame src=""/index.html"" name=""navigation"" noresize=""noresize""/>\n<frame src=""/main_overview.html"" name=""mainframe"" noresize=""noresize""/>\n</frameset>\n<noframes><body><h1>Willkommen!</h1><p>Dieses Projekt verwendet Frames.</p></body></noframes>\n</frameset>\n</html>\n", 700);
+    	 status = webserver_framework_root(resp_packet_ptr,server_ptr);
+
+     /* Return completion status. */
+     //return(NX_HTTP_CALLBACK_COMPLETED);
+   }
+    else if(strcmp(resource,"/top.html") == 0)
+   {
+     /* Found it, override the GET processing by sending the resource
+     contents directly. */
+     //nx_http_server_callback_data_send(server_ptr,
+     //"HTTP/1.0 200 \r\nContent-Length: 103\r\nContent-Type: text/html\r\n\r\n", 63);
+     //nx_http_server_callback_data_send(server_ptr, "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n<title>Shankar IOT</title><meta http-equiv=""content-type"" content=""text/html; charset=ISO-8859-1""><style type=""text/css"">td {font-family:arial, sans-serif; font-size:12px;}table.list {width:623px; margin:0 0 18px 13px; background-color: #FFFFFF; border-collapse:collapse; font-family:arial, sans-serif; font-size:12px;}th.list {height:30px; padding:0 3px 0 5px; text-align:left; background-color: #BFD0DA; border-top:2px groove #EEEEEE; border-left:2px groove #EEEEEE; border-bottom:1px solid #E4EBEE;}td.list {border-left:1px solid #E4EBEE; border-bottom:1px solid #E4EBEE; padding:7px 10px 7px 5px; vertical-align:top;}</style><body style=""margin:0; background-color:#ffffff;"">\n", 900);
+    	status = webserver_framework_top(resp_packet_ptr,server_ptr);
+
+     /* Return completion status. */
+     //return(NX_HTTP_CALLBACK_COMPLETED);
+   }
+    else if(strcmp(resource,"/main_overview.html") == 0)
+   {
+     /* Found it, override the GET processing by sending the resource
+     contents directly. */
+     //nx_http_server_callback_data_send(server_ptr,
+     //"HTTP/1.0 200 \r\nContent-Length: 103\r\nContent-Type: text/html\r\n\r\n", 63);
+     //nx_http_server_callback_data_send(server_ptr, "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">\n<html>\n<title>Shankar IOT</title><meta http-equiv=""content-type"" content=""text/html; charset=ISO-8859-1""><style type=""text/css"">td {font-family:arial, sans-serif; font-size:12px;}table.list {width:623px; margin:0 0 18px 13px; background-color: #FFFFFF; border-collapse:collapse; font-family:arial, sans-serif; font-size:12px;}th.list {height:30px; padding:0 3px 0 5px; text-align:left; background-color: #BFD0DA; border-top:2px groove #EEEEEE; border-left:2px groove #EEEEEE; border-bottom:1px solid #E4EBEE;}td.list {border-left:1px solid #E4EBEE; border-bottom:1px solid #E4EBEE; padding:7px 10px 7px 5px; vertical-align:top;}</style><body style=""margin:0; background-color:#ffffff;"">\n", 900);
+
+     /* Return completion status. */
+     //return(NX_HTTP_CALLBACK_COMPLETED);
+    	status = webserver_page_overview(resp_packet_ptr, server_ptr);
+   }
+    else if(strcmp(resource,"/index.html") == 0)
+   {
+     /* Found it, override the GET processing by sending the resource
+     contents directly. */
+     //nx_http_server_callback_data_send(server_ptr,
+     //"HTTP/1.0 200 \r\nContent-Length: 103\r\nContent-Type: text/html\r\n\r\n", 63);
+    	status = webserver_framework_index(resp_packet_ptr,server_ptr);
+
+     /* Return completion status. */
+     //return(NX_HTTP_CALLBACK_COMPLETED);
+   }
+    else if(strcmp(resource,"/stylesheet.css")==0)
+    {
+      /* send the stylesheet css file */
+        nx_http_server_callback_data_send(server_ptr, (UCHAR*)style_sheet_css, sizeof(style_sheet_css));
+    }
+    else
+    {
+    	return(NX_SUCCESS);
+    }
+
+	return(NX_HTTP_CALLBACK_COMPLETED);
 }
 static void print_address(CHAR* preable, uint8_t address[4])
 {
@@ -216,7 +285,6 @@ static bool check_firmware_version(CHAR* data)
 static UINT wifi_init()
 {
     CHAR data[32];
-    uint8_t mac[6];
 
     printf("\r\nInitializing WiFi\r\n");
 
@@ -235,8 +303,8 @@ static UINT wifi_init()
     WIFI_GetModuleID(data);
     printf("\tModule: %s\r\n", data);
 
-    WIFI_GetMAC_Address(mac);
-    printf("\tMAC address: %02X:%02X:%02X:%02X:%02X:%02X\r\n", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    WIFI_GetMAC_Address(wifi_mac);
+    printf("\tMAC address: %02X:%02X:%02X:%02X:%02X:%02X\r\n", wifi_mac[0], wifi_mac[1], wifi_mac[2], wifi_mac[3], wifi_mac[4], wifi_mac[5]);
 
     WIFI_GetModuleFwRevision(data);
     printf("\tFirmware revision: %s\r\n", data);
@@ -252,26 +320,23 @@ static UINT wifi_init()
 static UINT dhcp_connect()
 {
     UINT status;
-    UCHAR ip_address[4];
-    UCHAR ip_mask[4];
-    UCHAR gateway_address[4];
 
     printf("\r\nInitializing DHCP\r\n");
 
     // Get WIFI information
-    WIFI_GetIP_Address(ip_address);
-    WIFI_GetIP_Mask(ip_mask);
-    WIFI_GetGateway_Address(gateway_address);
+    WIFI_GetIP_Address(wifi_ip_address);
+    WIFI_GetIP_Mask(wifi_ip_mask);
+    WIFI_GetGateway_Address(wifi_gateway_address);
 
     // Output IP address and gateway address
-    print_address("IP address", ip_address);
-    print_address("Mask", ip_mask);
-    print_address("Gateway", gateway_address);
+    print_address("IP address", wifi_ip_address);
+    print_address("Mask", wifi_ip_mask);
+    print_address("Gateway", wifi_gateway_address);
 
     // Set IP address
     if ((status = nx_ip_address_set(&nx_ip,
-             IP_ADDRESS(ip_address[0], ip_address[1], ip_address[2], ip_address[3]),
-             IP_ADDRESS(ip_mask[0], ip_mask[1], ip_mask[2], ip_mask[3]))))
+             IP_ADDRESS(wifi_ip_address[0], wifi_ip_address[1], wifi_ip_address[2], wifi_ip_address[3]),
+             IP_ADDRESS(wifi_ip_mask[0], wifi_ip_mask[1], wifi_ip_mask[2], wifi_ip_mask[3]))))
     {
         printf("ERROR: nx_ip_address_set (0x%08x)\r\n", status);
         return status;
@@ -279,7 +344,7 @@ static UINT dhcp_connect()
 
     // Set gateway address
     if ((status = nx_ip_gateway_address_set(
-             &nx_ip, IP_ADDRESS(gateway_address[0], gateway_address[1], gateway_address[2], gateway_address[3]))))
+             &nx_ip, IP_ADDRESS(wifi_gateway_address[0], wifi_gateway_address[1], wifi_gateway_address[2], wifi_gateway_address[3]))))
     {
         printf("ERROR: nx_ip_gateway_address_set (0x%08x)\r\n", status);
         return status;
@@ -293,32 +358,32 @@ static UINT dhcp_connect()
 static UINT dns_connect()
 {
     UINT status;
-    UCHAR dns_address_1[4] = {0};
-    UCHAR dns_address_2[4] = {0};
+    //UCHAR wifi_dns_address_1[4] = {0};
+    //UCHAR wifi_dns_address_2[4] = {0};
 
     printf("\r\nInitializing DNS client\r\n");
 
-    if (WIFI_GetDNS_Address(dns_address_1, dns_address_2) != WIFI_STATUS_OK)
+    if (WIFI_GetDNS_Address(wifi_dns_address_1, wifi_dns_address_2) != WIFI_STATUS_OK)
     {
         printf("ERROR: WIFI_GetDNS_Address\r\n");
         return NX_NOT_SUCCESSFUL;
     }
 
     // Output DNS Server address
-    print_address("DNS address 1", dns_address_1);
-    print_address("DNS address 2", dns_address_2);
+    print_address("DNS address 1", wifi_dns_address_1);
+    print_address("DNS address 2", wifi_dns_address_2);
 
     if ((status = nx_dns_server_remove_all(&nx_dns_client)))
     {
         printf("ERROR: nx_dns_server_remove_all (0x%08x)\r\n", status);
     }
-    else if (status = nx_dns_server_add(&nx_dns_client, IP_ADDRESS(dns_address_1[0], dns_address_1[1], dns_address_1[2], dns_address_1[3])))
+    else if (status = nx_dns_server_add(&nx_dns_client, IP_ADDRESS(wifi_dns_address_1[0], wifi_dns_address_1[1], wifi_dns_address_1[2], wifi_dns_address_1[3])))
     {
         printf("ERROR: nx_dns_server_add (0x%08x)\r\n", status);
 
      }
     else if ((status = nx_dns_server_add(
-                  &nx_dns_client, IP_ADDRESS(dns_address_2[0], dns_address_2[1], dns_address_2[2], dns_address_2[3]))))
+                  &nx_dns_client, IP_ADDRESS(wifi_dns_address_2[0], wifi_dns_address_2[1], wifi_dns_address_2[2], wifi_dns_address_2[3]))))
     {
         printf("ERROR: nx_dns_server_add (0x%08x)\r\n", status);
     }
@@ -401,6 +466,13 @@ UINT stm_network_init(CHAR* ssid, CHAR* password, WiFi_Mode mode)
 
     }
 #endif
+    // Enable ICMP traffic
+    if ((status = nx_icmp_enable(&nx_ip)))
+    {
+        nx_ip_delete(&nx_ip);
+        nx_packet_pool_delete(&nx_pool);
+        printf("ERROR: nx_udp_enable (0x%08x)\r\n", status);
+    }
     // Enable TCP traffic
     if ((status = nx_tcp_enable(&nx_ip)))
     {
@@ -417,13 +489,6 @@ UINT stm_network_init(CHAR* ssid, CHAR* password, WiFi_Mode mode)
         printf("ERROR: nx_udp_enable (0x%08x)\r\n", status);
     }
 
-    // Enable ICMP traffic
-    if ((status = nx_icmp_enable(&nx_ip)))
-    {
-        nx_ip_delete(&nx_ip);
-        nx_packet_pool_delete(&nx_pool);
-        printf("ERROR: nx_udp_enable (0x%08x)\r\n", status);
-    }
 
     // Enable ip fragment
     if ((status = nx_ip_fragment_enable(&nx_ip)))
@@ -487,6 +552,21 @@ UINT stm_network_init(CHAR* ssid, CHAR* password, WiFi_Mode mode)
       /* Wait for the link to become ready */
       status = nx_ip_status_check(&nx_ip, NX_IP_ADDRESS_RESOLVED, &ip_status, 100);
     } while(status != TX_SUCCESS);
+
+    /* Create the HTTP Server.  */
+    if(status = nx_http_server_create(&my_server, "Shankar HTTP Server", &nx_ip,&ram_disk,
+                          (ULONG*)http_server_stack_area, sizeof(http_server_stack_area), &nx_pool, http_check_authentication, http_request_notify))
+    {
+    	nx_http_server_delete(&my_server);
+    	printf("ERROR: Failed to create http server (0x%08x)\r\n", status);
+    }
+
+    /* OK to start the HTTP Server.   */
+    if(status = nx_http_server_start(&my_server))
+    {
+    	printf("ERROR: Failed to start http server (0x%08x)\r\n", status);
+    }
+    tx_thread_sleep(2000);
     if(status =  nx_ip_address_get(&nx_ip, &ip_address, &network_mask))
     {
     	printf("ERROR: Failed to get ip (0x%08x)\r\n", status);
@@ -501,7 +581,6 @@ UINT stm_network_init(CHAR* ssid, CHAR* password, WiFi_Mode mode)
     {
     	printf("Error in creating MQTT client: 0x%02x\n", status);
     }
-
     return status;
 }
 
