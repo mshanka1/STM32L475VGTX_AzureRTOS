@@ -52,6 +52,8 @@
 TX_THREAD tx_app_thread;
 TX_SEMAPHORE tx_app_semaphore;
 TX_THREAD tx_ble_thread;
+TX_THREAD tx_mqtt_thread;
+TX_SEMAPHORE tx_mqtt_semaphore;
 
 //TX_THREAD       server_thread;
 /* USER CODE BEGIN PV */
@@ -101,6 +103,20 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
     return TX_POOL_ERROR;
   }
   /* Create tx app thread.  */
+  if (tx_thread_create(&tx_mqtt_thread, "tx mqtt thread", tx_mqtt_thread_entry, 0, pointer,
+                       TX_APP_STACK_SIZE, 13, TX_APP_THREAD_PREEMPTION_THRESHOLD,
+                       TX_APP_THREAD_TIME_SLICE, TX_APP_THREAD_AUTO_START) != TX_SUCCESS)
+  {
+    return TX_THREAD_ERROR;
+  }
+
+
+  if (tx_byte_allocate(byte_pool, (VOID**) &pointer,
+                       TX_APP_STACK_SIZE, TX_NO_WAIT) != TX_SUCCESS)
+  {
+    return TX_POOL_ERROR;
+  }
+  /* Create tx app thread.  */
   if (tx_thread_create(&tx_app_thread, "tx app thread", tx_app_thread_entry, 0, pointer,
                        TX_APP_STACK_SIZE, 11, TX_APP_THREAD_PREEMPTION_THRESHOLD,
                        TX_APP_THREAD_TIME_SLICE, TX_APP_THREAD_AUTO_START) != TX_SUCCESS)
@@ -110,6 +126,11 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
 
   /* Create tx app semaphore.  */
   if (tx_semaphore_create(&tx_app_semaphore, "tx app semaphore", 0) != TX_SUCCESS)
+  {
+    return TX_SEMAPHORE_ERROR;
+  }
+  /* Create tx app semaphore.  */
+  if (tx_semaphore_create(&tx_mqtt_semaphore, "tx mqtt semaphore", 0) != TX_SUCCESS)
   {
     return TX_SEMAPHORE_ERROR;
   }
@@ -150,6 +171,7 @@ void tx_ble_thread_entry(ULONG thread_input)
     	MX_BlueNRG_MS_Init();
 		while(1){
 			MX_BlueNRG_MS_Process();
+			//tx_thread_sleep(100);
 			if(WiFi_PWD_Memory[0]!='\n')
 			{
 				break;
@@ -172,7 +194,25 @@ void tx_ble_thread_entry(ULONG thread_input)
 
     // Initialize the network
 
-  /* USER CODE END tx_app_thread_entry */
+  /* USER CODE END tx_mqtt_thread_entry */
+}
+/**
+  * @brief  Function implementing the tx_app_thread_entry thread.
+  * @param  thread_input: Hardcoded to 0.
+  * @retval None
+  */
+void tx_mqtt_thread_entry(ULONG thread_input)
+{
+  /* USER CODE BEGIN tx_app_thread_entry */
+    UINT status;
+
+    printf("Starting Azure MQTT thread\r\n\r\n");
+    tx_semaphore_get(&tx_mqtt_semaphore, TX_WAIT_FOREVER);
+    do{
+    	stm_mqtt_pubsub();
+    	tx_thread_sleep(1000);
+
+    }while(!status);
 }
 /**
   * @brief  Function implementing the tx_app_thread_entry thread.
@@ -199,9 +239,10 @@ void tx_app_thread_entry(ULONG thread_input)
         	//restart system
         }
     }
+    tx_semaphore_put(&tx_mqtt_semaphore);
     do{
-    	stm_mqtt_pubsub();
-    	tx_thread_sleep(100);
+    	//stm_mqtt_pubsub();
+    	tx_thread_sleep(1000);
 
     }while(!status);
 

@@ -3,6 +3,7 @@
 "./BlueNRG_MS/App/sample_service.o"
 "./BlueNRG_MS/Target/hci_tl_interface.o"
 "./Core/Src/Memory_Driver.o"
+"./Core/Src/WebServer.o"
 "./Core/Src/app_threadx.o"
 "./Core/Src/board_ble_init.o"
 "./Core/Src/board_wifi_init.o"
