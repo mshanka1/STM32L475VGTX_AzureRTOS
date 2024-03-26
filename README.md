@@ -37,6 +37,8 @@ The board is capable of connecting the device with different wireless protocols 
 5. HTTP server created and running
 6. Add text read and write feature with ble to update the wifi settings
 7. MQTT feature added
+8. Added webserver pages to show the status of the device and take the mqtt endpoint and other mqtt credentials.(Work in Progress)
+9. Run MQTT pubsub and webserver in consequtive threads.
 
 Next Steps:
 1. Create fully functional WiFi feature
@@ -44,3 +46,5 @@ Next Steps:
 3. Add feature to change the MQTT endpoints
 4. Add TFT LCD to check the status of the module
 5. Add NFC functionality to read cards
+6. Add ULN2003 driver to auto lock/unlock the door using IOT.
+

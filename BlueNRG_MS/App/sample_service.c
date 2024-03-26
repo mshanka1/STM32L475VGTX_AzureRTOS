@@ -83,6 +83,7 @@ extern BLE_RoleTypeDef BLE_Role;
  * @param  None
  * @retval Status
  */
+
 tBleStatus Add_Sample_Service(void)
 {
   tBleStatus ret;
@@ -102,6 +103,7 @@ tBleStatus Add_Sample_Service(void)
   const uint8_t wifissidRX[16] = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x96,0x9e,0xe2,0x11,0x9e,0xb1,0xe3,0xf2,0x73,0xd9};
   const uint8_t wifipwddRX[16] = {0x66,0x9a,0x0c,0x20,0x00,0x08,0x96,0x9e,0xe2,0x11,0x9e,0xb1,0xe4,0xf2,0x73,0xd9};
 
+
   ret = aci_gatt_add_serv(UUID_TYPE_128, service_uuid, PRIMARY_SERVICE, 10, &sampleServHandle); /* original is 9?? */
   if (ret != BLE_STATUS_SUCCESS) goto fail;
 
@@ -109,9 +111,12 @@ tBleStatus Add_Sample_Service(void)
                            16, 1, &TXCharHandle);
   if (ret != BLE_STATUS_SUCCESS) goto fail;
 
+
   ret =  aci_gatt_add_char(sampleServHandle, UUID_TYPE_128, charUuidRX, 20, CHAR_PROP_WRITE|CHAR_PROP_WRITE_WITHOUT_RESP, ATTR_PERMISSION_NONE, GATT_NOTIFY_ATTRIBUTE_WRITE,
                            16, 1, &RXCharHandle);
   if (ret != BLE_STATUS_SUCCESS) goto fail;
+
+
 
   ret =  aci_gatt_add_char(sampleServHandle, UUID_TYPE_128, wifissidRX, 20, CHAR_PROP_WRITE|CHAR_PROP_WRITE_WITHOUT_RESP, ATTR_PERMISSION_NONE, GATT_NOTIFY_ATTRIBUTE_WRITE,
                            16, 1, &RXWiFiSSIDCharHandle);
