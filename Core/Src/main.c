@@ -40,7 +40,6 @@ int WiFi_Select_Mode = 3;
 #define TX_TIMEOUT 2000
 #define RX_TIMEOUT 2000
 
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -77,12 +76,10 @@ void ble_gpio_init(void)
   * @brief  The application entry point.
   * @retval int
   */
-
 int main(void)
 {
   /* USER CODE BEGIN 1 */
 	//int status =1;
-
 
   /* USER CODE END 1 */
 
@@ -190,6 +187,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 /* USER CODE BEGIN MX_GPIO_Init_1 */
 /* USER CODE END MX_GPIO_Init_1 */
+
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOE_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
