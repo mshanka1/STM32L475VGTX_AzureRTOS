@@ -104,8 +104,8 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
   }
   /* Create tx app thread.  */
   if (tx_thread_create(&tx_mqtt_thread, "tx mqtt thread", tx_mqtt_thread_entry, 0, pointer,
-                       TX_APP_STACK_SIZE, 13, TX_APP_THREAD_PREEMPTION_THRESHOLD,
-                       TX_APP_THREAD_TIME_SLICE, TX_APP_THREAD_AUTO_START) != TX_SUCCESS)
+                       TX_APP_STACK_SIZE, 13, 13,
+					   TX_APP_THREAD_TIME_SLICE, TX_APP_THREAD_AUTO_START) != TX_SUCCESS)
   {
     return TX_THREAD_ERROR;
   }
@@ -118,8 +118,8 @@ UINT App_ThreadX_Init(VOID *memory_ptr)
   }
   /* Create tx app thread.  */
   if (tx_thread_create(&tx_app_thread, "tx app thread", tx_app_thread_entry, 0, pointer,
-                       TX_APP_STACK_SIZE, 11, TX_APP_THREAD_PREEMPTION_THRESHOLD,
-                       TX_APP_THREAD_TIME_SLICE, TX_APP_THREAD_AUTO_START) != TX_SUCCESS)
+                       TX_APP_STACK_SIZE, 7, 7,
+					   TX_APP_THREAD_TIME_SLICE, TX_APP_THREAD_AUTO_START) != TX_SUCCESS)
   {
     return TX_THREAD_ERROR;
   }
@@ -240,9 +240,10 @@ void tx_app_thread_entry(ULONG thread_input)
         }
     }
     tx_semaphore_put(&tx_mqtt_semaphore);
+    stm_http_server();
     do{
     	//stm_mqtt_pubsub();
-    	tx_thread_sleep(1000);
+    	tx_thread_sleep(100);
 
     }while(!status);
 

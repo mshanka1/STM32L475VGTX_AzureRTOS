@@ -531,7 +531,7 @@ int webserver_framework_root(NX_PACKET* resp_packet_ptr, NX_HTTP_SERVER* server_
  /* page status*/
   int status;
   /* html header information for this page*/
-  char root_htmlheader[] = {"<head><title>G501</title><meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\"> </head> \
+  char root_htmlheader[] = {"<head><title>SHANKARIOT</title><meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\"> </head> \
                        <link rel=\"icon\" type=\"image/ico\" href=\"/favicon.ico\"> <head>\n \
                        <frameset rows=\"116,*\" border=\"0\">\n \
                        <frame src=\"/top.html\" name=\"header\" noresize=\"noresize\" scrolling=\"no\">\n \
@@ -583,7 +583,7 @@ int webserver_framework_top(NX_PACKET* resp_packet_ptr, NX_HTTP_SERVER* server_p
     /* page status*/
   int status;
   char tempStr[100] = {'\0'};
-  char top_htmlheader[] = {"<head><title>G501</title><meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\"></head> \
+  char top_htmlheader[] = {"<head><title>SHANKARIOT</title><meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\"></head> \
                        <style type=\"text/css\">\n \
                        td {font-family:arial, sans-serif; font-size:12px;}\n \
                        table.list {width:623px; margin:0 0 18px 13px; background-color: #FFFFFF; border-collapse:collapse; font-family:arial, sans-serif; font-size:12px;}\n \
@@ -680,7 +680,7 @@ int webserver_framework_index(NX_PACKET* resp_packet_ptr, NX_HTTP_SERVER* server
 {
   //uint8_t userType = USERMAN_TYPE_DEFAULT;
   //uint8_t userStatus = 0;
-  char index_htmlheader[] = {"<head><title>G501</title><meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\"></head> \
+  char index_htmlheader[] = {"<head><title>SHANKARIOT</title><meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\"></head> \
                        <style type=\"text/css\">\n \
                        td.nav {width:190px; background-color:#E4EBEE; border-top:2px groove #EEEEEE; border-left:2px groove #EEEEEE; padding:2px 0px 2px 6px;}\n \
                        td.topnav {width:190px; border-top:2px groove #EEEEEE; border-left:2px groove #EEEEEE; padding:2px 0px 2px 6px; font-family:arial, sans-serif; font-size:12px; font-weight:bold; color:#000000;}\n \
@@ -940,7 +940,7 @@ int webserver_page_overview(NX_PACKET* resp_packet_ptr, NX_HTTP_SERVER* server_p
   /* string buffer*/
   char tempStr[200] = {'\0'};
   //time_t              RawTime_temp;
-  char overview_htmlheader[] = {"<head><title>G501</title><meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\"> \
+  char overview_htmlheader[] = {"<head><title>SHANKARIOT</title><meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\"> \
                        <link rel=\"stylesheet\" type=\"text/css\" href=\"/stylesheet.css\"> \
                        <script type=\"text/javascript\"> function refresh(){parent.frames[\"navigation\"].location.replace(\"/index.html\");}</script></head>\n"};
   /* network address structure*/
@@ -1181,7 +1181,7 @@ int webserver_page_overview(NX_PACKET* resp_packet_ptr, NX_HTTP_SERVER* server_p
 #if 0
 int webserver_page_version(NX_PACKET* resp_packet_ptr, NX_HTTP_SERVER* server_ptr)
 {
-  char version_htmlheader[] = {"<head><title>G501</title><meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\"> \
+  char version_htmlheader[] = {"<head><title>SHANKARIOT</title><meta http-equiv=\"content-type\" content=\"text/html; charset=ISO-8859-1\"> \
                        <link rel=\"stylesheet\" type=\"text/css\" href=\"/stylesheet.css\"> \
                        <script type=\"text/javascript\"> function refresh(){parent.frames[\"navigation\"].location.replace(\"/index.html\");}</script></head>\n"};
   /* Declaration of various components version buffer*/
