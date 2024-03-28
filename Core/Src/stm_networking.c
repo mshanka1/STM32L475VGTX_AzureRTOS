@@ -669,18 +669,21 @@ UINT stm_mqtt_pubsub()
 	}
 
     /* Now wait for the broker to publish the message. */
-
-    tx_event_flags_get(&mqtt_app_flag, MQTT_DEMO_ALL_EVENTS, TX_OR_CLEAR, &events, 1000);
-    if(events & MQTT_DEMO_MESSAGE_EVENT)
+    if(mqtt_connect_status==1)
     {
-        status = nxd_mqtt_client_message_get(&mqtt_client, MQTT_topic_buffer, sizeof(MQTT_topic_buffer), &topic_length,
-                                             MQTT_message_buffer, sizeof(MQTT_message_buffer), &message_length);
-        if(status == NXD_MQTT_SUCCESS)
-        {
-            MQTT_topic_buffer[topic_length] = 0;
-            MQTT_message_buffer[message_length] = 0;
-            printf("topic = %s, message = %s\n", MQTT_topic_buffer, MQTT_message_buffer);
-        }
+
+		tx_event_flags_get(&mqtt_app_flag, MQTT_DEMO_ALL_EVENTS, TX_OR_CLEAR, &events, 1000);
+		if(events & MQTT_DEMO_MESSAGE_EVENT)
+		{
+			status = nxd_mqtt_client_message_get(&mqtt_client, MQTT_topic_buffer, sizeof(MQTT_topic_buffer), &topic_length,
+												 MQTT_message_buffer, sizeof(MQTT_message_buffer), &message_length);
+			if(status == NXD_MQTT_SUCCESS)
+			{
+				MQTT_topic_buffer[topic_length] = 0;
+				MQTT_message_buffer[message_length] = 0;
+				printf("topic = %s, message = %s\n", MQTT_topic_buffer, MQTT_message_buffer);
+			}
+		}
     }
     if(mqtt_connect_status==0)
     {
