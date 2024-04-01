@@ -33,6 +33,9 @@ union UT_FALSH_DATA
 		uint8_t  wifi_ssid_memory[20];                                          /**< The currently selected protocol */
 		uint8_t  wifi_pwd_memory[50];                                          /**< The currently selected protocol */
 		int 	WiFi_Select_Mode;
+		uint8_t mqtt_endpoint[50];
+		uint8_t mqtt_user_name[20];
+		uint8_t mqtt_pwd[50];
 	}ConfigData;
 }U_ConfigData;
 static uint32_t GetBank(uint32_t Address);
@@ -206,6 +209,42 @@ int memory_driver_read(void)
 			  }
 		  }
 		  WiFi_Select_Mode = U_ConfigData.ConfigData.WiFi_Select_Mode;
+		  for(int i=0;i<50;i++)
+		  {
+			  if((U_ConfigData.ConfigData.mqtt_endpoint[i]=='\n')||(U_ConfigData.ConfigData.mqtt_endpoint[i]=='\0'))
+			  {
+				  mqtt_endpoint_Memory[i]='\0';
+				  break;
+			  }
+			  else
+			  {
+				  mqtt_endpoint_Memory[i]=U_ConfigData.ConfigData.mqtt_endpoint[i];
+			  }
+		  }
+		  for(int i=0;i<20;i++)
+		  {
+			  if((U_ConfigData.ConfigData.mqtt_user_name[i]=='\n')||(U_ConfigData.ConfigData.mqtt_user_name[i]=='\0'))
+			  {
+				  mqtt_username_Memory[i]='\0';
+				  break;
+			  }
+			  else
+			  {
+				  mqtt_username_Memory[i]=U_ConfigData.ConfigData.mqtt_user_name[i];
+			  }
+		  }
+		  for(int i=0;i<50;i++)
+		  {
+			  if((U_ConfigData.ConfigData.mqtt_endpoint[i]=='\n')||(U_ConfigData.ConfigData.mqtt_endpoint[i]=='\0'))
+			  {
+				  mqtt_pwd_Memory[i]='\0';
+				  break;
+			  }
+			  else
+			  {
+				  mqtt_pwd_Memory[i]=U_ConfigData.ConfigData.mqtt_endpoint[i];
+			  }
+		  }
 
 	  	  return 0;
 	  }
@@ -222,7 +261,7 @@ void copy_data(void)
 {
 	  U_ConfigData.ConfigData.MagicNumber = 0xABCD;
 	  memcpy(&U_ConfigData.ConfigData.wifi_ssid_memory,&WiFi_SSID_Memory,sizeof(char)*20);
-	  memcpy(&U_ConfigData.ConfigData.wifi_pwd_memory,&WiFi_PWD_Memory,sizeof(char)*20);
+	  memcpy(&U_ConfigData.ConfigData.wifi_pwd_memory,&WiFi_PWD_Memory,sizeof(char)*50);
 	  U_ConfigData.ConfigData.WiFi_Select_Mode = WiFi_Select_Mode;
 
 }

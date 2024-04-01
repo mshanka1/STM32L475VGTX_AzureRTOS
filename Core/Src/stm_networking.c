@@ -21,7 +21,7 @@
 #include   "nxd_http_server.h"
 #include "nxd_mqtt_client.h"
 
-#define NETX_IP_STACK_SIZE 8192
+#define NETX_IP_STACK_SIZE 2048
 #define NETX_PACKET_COUNT  20
 #define NETX_PACKET_SIZE   1200 // Set the default value to 1200 since WIFI payload size (ES_WIFI_PAYLOAD_SIZE) is 1200
 #define NETX_POOL_SIZE     ((NETX_PACKET_SIZE + sizeof(NX_PACKET)) * NETX_PACKET_COUNT)
@@ -65,7 +65,7 @@ ULONG             arp_space_area[512 / sizeof(ULONG)];
 
 
 /* Set up FileX and file memory resources. */
-UCHAR           ram_disk_memory[32000];
+//UCHAR           ram_disk_memory[32000];
 FX_MEDIA        ram_disk;
 unsigned char   media_memory[512];
 ULONG           http_server_stack_area[1024];
@@ -94,7 +94,7 @@ NX_IP           server_ip;
 NXD_ADDRESS     server_ip_address;
 #define         SERVER_PACKET_SIZE  (NX_HTTP_SERVER_MIN_PACKET_SIZE * 2)
 #define HTTP_SERVER_ADDRESS  IP_ADDRESS(1,2,3,4)
-
+static int mqtt_connect_status;
 // WiFi firmware version required
 static const UINT wifi_required_version[] = {3, 5, 2, 7};
 /* Define the application's authentication check.  This is called by
@@ -118,7 +118,7 @@ UINT  http_check_authentication(NX_HTTP_SERVER *server_ptr, UINT request_type,
 }
 /////////MQTT///////////////////////////////////
 #define  MQTT_CLIENT_ID_STRING           "mytestclient"
-#define  MQTT_CLIENT_STACK_SIZE     4096
+#define  MQTT_CLIENT_STACK_SIZE     2048
 
 #define  STRLEN(p)                  (sizeof(p) - 1)
 
@@ -180,6 +180,7 @@ static VOID MQTT_my_notify_func(NXD_MQTT_CLIENT* client_ptr, UINT number_of_mess
 
 UINT http_request_notify(NX_HTTP_SERVER *server_ptr, UINT request_type,CHAR *resource, NX_PACKET *packet_ptr)
 {
+	char *cmd_string = (char*)(packet_ptr -> nx_packet_prepend_ptr);
 	unsigned int status;
     NX_PACKET *resp_packet_ptr = NULL;
     /** \brief static array holding the stylesheet.css file used on the webpage */
@@ -189,18 +190,25 @@ UINT http_request_notify(NX_HTTP_SERVER *server_ptr, UINT request_type,CHAR *res
                                          "H1   {margin-top: 7pt;margin-bottom: 3pt;font-size : 14pt;line-height : 14pt;}"
                                          "H2   {margin-top: 8pt;margin-bottom: 6pt;font-size : 12pt;line-height : 12pt;}"};
 
+
      if(strcmp(resource,"/") == 0)
    {
      /* Found it, override the GET processing by sending the resource
      contents directly. */
      //nx_http_server_callback_data_send(server_ptr,
-     //"HTTP/1.0 200 \r\nContent-Length: 103\r\nContent-Type: text/html\r\n\r\n", 63);
+    		 //pwd_array, sizeof(pwd_array));
      //nx_http_server_callback_data_send(server_ptr, "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\">\n<html>\n<head><title>Shankar IOT</title><meta http-equiv=""content-type"" content=""text/html; charset=ISO-8859-1"">\n<link rel=""icon"" type=""image/ico"" href=""/favicon.ico""/>\n</head>\n<frameset rows=""193,*"" border=""0""/>\n<frame src=""/top.html"" name=""header"" noresize=""noresize"" scrolling=""no""/>\n<frameset cols=""243,*"" border=""0""/>\n<frame src=""/index.html"" name=""navigation"" noresize=""noresize""/>\n<frame src=""/main_overview.html"" name=""mainframe"" noresize=""noresize""/>\n</frameset>\n<noframes><body><h1>Willkommen!</h1><p>Dieses Projekt verwendet Frames.</p></body></noframes>\n</frameset>\n</html>\n", 700);
-    	 status = webserver_framework_root(resp_packet_ptr,server_ptr);
+    	 status = webserver_page_shankariot(resp_packet_ptr, server_ptr,resource, cmd_string);
 
      /* Return completion status. */
      //return(NX_HTTP_CALLBACK_COMPLETED);
    }
+     else if(strcmp(resource,"/stylesheet.css")==0)
+     {
+       /* send the stylesheet css file */
+         nx_http_server_callback_data_send(server_ptr, (UCHAR*)style_sheet_css, sizeof(style_sheet_css));
+     }
+#if 0
     else if(strcmp(resource,"/top.html") == 0)
    {
      /* Found it, override the GET processing by sending the resource
@@ -231,7 +239,8 @@ UINT http_request_notify(NX_HTTP_SERVER *server_ptr, UINT request_type,CHAR *res
      contents directly. */
      //nx_http_server_callback_data_send(server_ptr,
      //"HTTP/1.0 200 \r\nContent-Length: 103\r\nContent-Type: text/html\r\n\r\n", 63);
-    	status = webserver_framework_index(resp_packet_ptr,server_ptr);
+    	//status = webserver_framework_index(resp_packet_ptr,server_ptr);
+    	status = webserver_page_deviceconfig(resp_packet_ptr, server_ptr, resource, cmd_string);
 
      /* Return completion status. */
      //return(NX_HTTP_CALLBACK_COMPLETED);
@@ -241,6 +250,12 @@ UINT http_request_notify(NX_HTTP_SERVER *server_ptr, UINT request_type,CHAR *res
       /* send the stylesheet css file */
         nx_http_server_callback_data_send(server_ptr, (UCHAR*)style_sheet_css, sizeof(style_sheet_css));
     }
+    //else if(strcmp(resource,"/device.html") == 0)
+    //{
+      /* Display the device config page*/
+      //status = webserver_page_deviceconfig(resp_packet_ptr, server_ptr, resource, cmd_string);
+    //}
+#endif
     else
     {
     	return(NX_SUCCESS);
@@ -552,7 +567,7 @@ UINT stm_network_init(CHAR* ssid, CHAR* password, WiFi_Mode mode)
       /* Wait for the link to become ready */
       status = nx_ip_status_check(&nx_ip, NX_IP_ADDRESS_RESOLVED, &ip_status, 100);
     } while(status != TX_SUCCESS);
-
+#if 0
     /* Create the HTTP Server.  */
     if(status = nx_http_server_create(&my_server, "Shankar HTTP Server", &nx_ip,&ram_disk,
                           (ULONG*)http_server_stack_area, sizeof(http_server_stack_area), &nx_pool, http_check_authentication, http_request_notify))
@@ -567,23 +582,30 @@ UINT stm_network_init(CHAR* ssid, CHAR* password, WiFi_Mode mode)
     	printf("ERROR: Failed to start http server (0x%08x)\r\n", status);
     }
     tx_thread_sleep(2000);
-    if(status =  nx_ip_address_get(&nx_ip, &ip_address, &network_mask))
-    {
-    	printf("ERROR: Failed to get ip (0x%08x)\r\n", status);
-    }
-
-    if(status = nxd_mqtt_client_create(&mqtt_client, "my_client", MQTT_CLIENT_ID_STRING, STRLEN(MQTT_CLIENT_ID_STRING),
-    							&nx_ip,
-								&nx_pool,
-								(VOID*)mqtt_client_stack,
-								sizeof(mqtt_client_stack),
-                                    MQTT_THREAD_PRIORTY, NX_NULL, 0))
-    {
-    	printf("Error in creating MQTT client: 0x%02x\n", status);
-    }
+#endif
     return status;
 }
+UINT stm_http_server()
+{
+    UINT status;
+    /* Create the HTTP Server.  */
+    if(status = nx_http_server_create(&my_server, "Shankar HTTP Server", &nx_ip,&ram_disk,
+                          (ULONG*)http_server_stack_area, sizeof(http_server_stack_area), &nx_pool, http_check_authentication, http_request_notify))
+    {
+    	nx_http_server_delete(&my_server);
+    	printf("ERROR: Failed to create http server (0x%08x)\r\n", status);
+    }
 
+    /* OK to start the HTTP Server.   */
+    if(status = nx_http_server_start(&my_server))
+    {
+    	printf("ERROR: Failed to start http server (0x%08x)\r\n", status);
+    }
+    tx_thread_sleep(2000);
+
+    return status;
+
+}
 /*MQTT API
  *
  */
@@ -592,75 +614,109 @@ UINT stm_mqtt_pubsub()
     UINT status;
     ULONG events;
     UINT topic_length, message_length;
+    ULONG     ip_address;
+    ULONG     network_mask;
 
-    if(host_ip_address==0)
+    if(mqtt_connect_status==0)
     {
-		if(WIFI_GetHostAddress("xyz",&host_ip_address) != WIFI_STATUS_OK)
-		{
-			printf("ERROR: WIFI_GetDNS_Address\r\n");
-			return NX_NOT_SUCCESSFUL;
+        if(status =  nx_ip_address_get(&nx_ip, &ip_address, &network_mask))
+        {
+        	printf("ERROR: Failed to get ip (0x%08x)\r\n", status);
+        }
+        if(status = nxd_mqtt_client_create(&mqtt_client, "my_client", MQTT_CLIENT_ID_STRING, STRLEN(MQTT_CLIENT_ID_STRING),
+        							&nx_ip,
+    								&nx_pool,
+    								(VOID*)mqtt_client_stack,
+    								sizeof(mqtt_client_stack),
+                                        MQTT_THREAD_PRIORTY, NX_NULL, 0))
+        {
+        	printf("Error in creating MQTT client: 0x%02x\n", status);
+        }
+        if(mqtt_endpoint_Memory[0]=='m')
+        {
+        	mqtt_connect_status=1;
+			if(host_ip_address==0)
+			{
+				if(WIFI_GetHostAddress(mqtt_endpoint_Memory,&host_ip_address) != WIFI_STATUS_OK)
+				{
+					printf("ERROR: WIFI_GetDNS_Address\r\n");
+					return NX_NOT_SUCCESSFUL;
+				}
+			}
+			host_ip_address=__builtin_bswap32(host_ip_address);
+		#ifdef NXD_MQTT_OVER_WEBSOCKET
+			//status = nxd_mqtt_client_websocket_set(&mqtt_client, (UCHAR *)"MY-PC", sizeof("MY-PC") - 1,
+				//								   (UCHAR *)"mqtt://MY-PC:1883", sizeof("mqtt://MY-PC:1883") - 1);
+			//if (status)
+			//{
+				//printf("Error in setting MQTT over WebSocket: 0x%02x\r\n", status);
+				//error_counter++;
+			//}
+		#endif /* NXD_MQTT_OVER_WEBSOCKET */
+
+			/* Register the disconnect notification function. */
+			nxd_mqtt_client_disconnect_notify_set(&mqtt_client, MQTT_my_disconnect_func);
+
+			/* Create an event flag for this demo. */
+			status = tx_event_flags_create(&mqtt_app_flag, "my app event");
+
+
+			mqtt_server_ip.nxd_ip_version = 4;
+			mqtt_server_ip.nxd_ip_address.v4 = host_ip_address;//MQTT_LOCAL_SERVER_ADDRESS;//
+
+
+			/* Start the connection to the server. */
+			status = nxd_mqtt_client_login_set(&mqtt_client,mqtt_username_Memory, strlen(mqtt_username_Memory),mqtt_pwd_Memory,strlen(mqtt_pwd_Memory));
+			status = nxd_mqtt_client_connect(&mqtt_client, &mqtt_server_ip, NXD_MQTT_PORT,
+											 MQTT_KEEP_ALIVE_TIMER, 0, NX_WAIT_FOREVER);
+
+			/* Subscribe to the topic with QoS level 0. */
+			status = nxd_mqtt_client_subscribe(&mqtt_client, TOPIC_NAME, STRLEN(TOPIC_NAME), QOS0);
+
+			/* Set the receive notify function. */
+			status = nxd_mqtt_client_receive_notify_set(&mqtt_client, MQTT_my_notify_func);
+
+			/* Publish a message with QoS Level 1. */
+			status = nxd_mqtt_client_publish(&mqtt_client, TOPIC_NAME, STRLEN(TOPIC_NAME),
+											 (CHAR*)MESSAGE_STRING, STRLEN(MESSAGE_STRING), 0, QOS1, NX_WAIT_FOREVER);
+
+        }
+		if(status!=0){
+		mqtt_connect_status=0;
 		}
-    }
-    host_ip_address=__builtin_bswap32(host_ip_address);
-#ifdef NXD_MQTT_OVER_WEBSOCKET
-    status = nxd_mqtt_client_websocket_set(&mqtt_client, (UCHAR *)"test.mosquitto.org", sizeof("test.mosquitto.org") - 1,
-                                           (UCHAR *)"/mqtt", sizeof("/mqtt") - 1);
-    if (status)
-    {
-        printf("Error in setting MQTT over WebSocket: 0x%02x\r\n", status);
-        //error_counter++;
-    }
-#endif /* NXD_MQTT_OVER_WEBSOCKET */
-
-    /* Register the disconnect notification function. */
-    nxd_mqtt_client_disconnect_notify_set(&mqtt_client, MQTT_my_disconnect_func);
-
-    /* Create an event flag for this demo. */
-    status = tx_event_flags_create(&mqtt_app_flag, "my app event");
-
-
-    mqtt_server_ip.nxd_ip_version = 4;
-    mqtt_server_ip.nxd_ip_address.v4 = host_ip_address;//MQTT_LOCAL_SERVER_ADDRESS;//
-
-
-    /* Start the connection to the server. */
-    status = nxd_mqtt_client_login_set(&mqtt_client,"xyz", strlen("xyz"),"xyz",strlen("xyz"));
-    status = nxd_mqtt_client_connect(&mqtt_client, &mqtt_server_ip, NXD_MQTT_PORT,
-                                     MQTT_KEEP_ALIVE_TIMER, 0, NX_WAIT_FOREVER);
-
-    /* Subscribe to the topic with QoS level 0. */
-    status = nxd_mqtt_client_subscribe(&mqtt_client, TOPIC_NAME, STRLEN(TOPIC_NAME), QOS0);
-
-    /* Set the receive notify function. */
-    status = nxd_mqtt_client_receive_notify_set(&mqtt_client, MQTT_my_notify_func);
-
-    /* Publish a message with QoS Level 1. */
-    status = nxd_mqtt_client_publish(&mqtt_client, TOPIC_NAME, STRLEN(TOPIC_NAME),
-                                     (CHAR*)MESSAGE_STRING, STRLEN(MESSAGE_STRING), 0, QOS1, NX_WAIT_FOREVER);
-
+	}
 
     /* Now wait for the broker to publish the message. */
-
-    tx_event_flags_get(&mqtt_app_flag, MQTT_DEMO_ALL_EVENTS, TX_OR_CLEAR, &events, TX_WAIT_FOREVER);
-    if(events & MQTT_DEMO_MESSAGE_EVENT)
+    if(mqtt_connect_status==1)
     {
-        status = nxd_mqtt_client_message_get(&mqtt_client, MQTT_topic_buffer, sizeof(MQTT_topic_buffer), &topic_length,
-                                             MQTT_message_buffer, sizeof(MQTT_message_buffer), &message_length);
-        if(status == NXD_MQTT_SUCCESS)
-        {
-            MQTT_topic_buffer[topic_length] = 0;
-            MQTT_message_buffer[message_length] = 0;
-            printf("topic = %s, message = %s\n", MQTT_topic_buffer, MQTT_message_buffer);
-        }
-    }
 
-    /* Now unsubscribe the topic. */
-    nxd_mqtt_client_unsubscribe(&mqtt_client, TOPIC_NAME, STRLEN(TOPIC_NAME));
-    /* Disconnect from the broker. */
-	nxd_mqtt_client_disconnect(&mqtt_client);
+		tx_event_flags_get(&mqtt_app_flag, MQTT_DEMO_ALL_EVENTS, TX_OR_CLEAR, &events, 1000);
+		if(events & MQTT_DEMO_MESSAGE_EVENT)
+		{
+			status = nxd_mqtt_client_message_get(&mqtt_client, MQTT_topic_buffer, sizeof(MQTT_topic_buffer), &topic_length,
+												 MQTT_message_buffer, sizeof(MQTT_message_buffer), &message_length);
+			if(status == NXD_MQTT_SUCCESS)
+			{
+				MQTT_topic_buffer[topic_length] = 0;
+				MQTT_message_buffer[message_length] = 0;
+				printf("topic = %s, message = %s\n", MQTT_topic_buffer, MQTT_message_buffer);
+			}
+		}
+    }
+    if(mqtt_connect_status==0)
+    {
+		if(mqtt_endpoint_Memory[0]=='m')
+		{
+
+			/* Now unsubscribe the topic. */
+			nxd_mqtt_client_unsubscribe(&mqtt_client, TOPIC_NAME, STRLEN(TOPIC_NAME));
+			/* Disconnect from the broker. */
+			nxd_mqtt_client_disconnect(&mqtt_client);
+		}
 
 	/* Delete the client instance, release all the resources. */
-	nxd_mqtt_client_delete(&mqtt_client);
+		status = nxd_mqtt_client_delete(&mqtt_client);
+    }
     return status;
 
 }

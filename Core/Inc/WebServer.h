@@ -56,7 +56,8 @@ extern int         webserver_page_version           (NX_PACKET*, NX_HTTP_SERVER*
 extern int         webserver_page_contact           (NX_PACKET* , NX_HTTP_SERVER*);
 extern int         webserver_page_login             (NX_PACKET* resp_packet_ptr, NX_HTTP_SERVER* server_ptr, char* pFilename, char* pFormdata);
 extern int         webserver_page_logout            (NX_PACKET* resp_packet_ptr, NX_HTTP_SERVER* server_ptr);
-
+extern int         webserver_page_deviceconfig      (NX_PACKET*, NX_HTTP_SERVER*, char*, char*);
+extern int 		   webserver_page_shankariot		(NX_PACKET* resp_packet_ptr, NX_HTTP_SERVER* server_ptr,char*,char*);
 
 
 #endif /* INC_WEBSERVER_H_ */
