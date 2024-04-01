@@ -90,7 +90,7 @@ extern   "C" {
 
 
 /* Define the HTTP version.  */
-#define NX_HTTP_VERSION                     "HTTP/1.0"
+#define NX_HTTP_VERSION                     "HTTP/1.1"
     
 /* Enable Digest authentication. 
 #define NX_HTTP_DIGEST_ENABLE
@@ -119,23 +119,23 @@ extern   "C" {
 #endif
 
 #ifndef NX_HTTP_SERVER_TIMEOUT_ACCEPT
-#define NX_HTTP_SERVER_TIMEOUT_ACCEPT       (10 * NX_IP_PERIODIC_RATE)
+#define NX_HTTP_SERVER_TIMEOUT_ACCEPT       (20 * NX_IP_PERIODIC_RATE)
 #endif
 
 #ifndef NX_HTTP_SERVER_TIMEOUT_RECEIVE
-#define NX_HTTP_SERVER_TIMEOUT_RECEIVE      (10 * NX_IP_PERIODIC_RATE)
+#define NX_HTTP_SERVER_TIMEOUT_RECEIVE      (20 * NX_IP_PERIODIC_RATE)
 #endif
 
 #ifndef NX_HTTP_SERVER_TIMEOUT_SEND
-#define NX_HTTP_SERVER_TIMEOUT_SEND         (10 * NX_IP_PERIODIC_RATE)
+#define NX_HTTP_SERVER_TIMEOUT_SEND         (20 * NX_IP_PERIODIC_RATE)
 #endif
 
 #ifndef NX_HTTP_SERVER_TIMEOUT_DISCONNECT
-#define NX_HTTP_SERVER_TIMEOUT_DISCONNECT   (10 * NX_IP_PERIODIC_RATE)
+#define NX_HTTP_SERVER_TIMEOUT_DISCONNECT   (20 * NX_IP_PERIODIC_RATE)
 #endif
 
 #ifndef NX_HTTP_SERVER_TIMEOUT
-#define NX_HTTP_SERVER_TIMEOUT              (10 * NX_IP_PERIODIC_RATE)
+#define NX_HTTP_SERVER_TIMEOUT              (20 * NX_IP_PERIODIC_RATE)
 #endif
 
 #ifndef NX_HTTP_SERVER_MAX_PENDING

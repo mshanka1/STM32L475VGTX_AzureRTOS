@@ -180,6 +180,7 @@ static VOID MQTT_my_notify_func(NXD_MQTT_CLIENT* client_ptr, UINT number_of_mess
 
 UINT http_request_notify(NX_HTTP_SERVER *server_ptr, UINT request_type,CHAR *resource, NX_PACKET *packet_ptr)
 {
+	char *cmd_string = (char*)(packet_ptr -> nx_packet_prepend_ptr);
 	unsigned int status;
     NX_PACKET *resp_packet_ptr = NULL;
     /** \brief static array holding the stylesheet.css file used on the webpage */
@@ -189,18 +190,25 @@ UINT http_request_notify(NX_HTTP_SERVER *server_ptr, UINT request_type,CHAR *res
                                          "H1   {margin-top: 7pt;margin-bottom: 3pt;font-size : 14pt;line-height : 14pt;}"
                                          "H2   {margin-top: 8pt;margin-bottom: 6pt;font-size : 12pt;line-height : 12pt;}"};
 
+
      if(strcmp(resource,"/") == 0)
    {
      /* Found it, override the GET processing by sending the resource
      contents directly. */
      //nx_http_server_callback_data_send(server_ptr,
-     //"HTTP/1.0 200 \r\nContent-Length: 103\r\nContent-Type: text/html\r\n\r\n", 63);
+    		 //pwd_array, sizeof(pwd_array));
      //nx_http_server_callback_data_send(server_ptr, "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\">\n<html>\n<head><title>Shankar IOT</title><meta http-equiv=""content-type"" content=""text/html; charset=ISO-8859-1"">\n<link rel=""icon"" type=""image/ico"" href=""/favicon.ico""/>\n</head>\n<frameset rows=""193,*"" border=""0""/>\n<frame src=""/top.html"" name=""header"" noresize=""noresize"" scrolling=""no""/>\n<frameset cols=""243,*"" border=""0""/>\n<frame src=""/index.html"" name=""navigation"" noresize=""noresize""/>\n<frame src=""/main_overview.html"" name=""mainframe"" noresize=""noresize""/>\n</frameset>\n<noframes><body><h1>Willkommen!</h1><p>Dieses Projekt verwendet Frames.</p></body></noframes>\n</frameset>\n</html>\n", 700);
-    	 status = webserver_framework_root(resp_packet_ptr,server_ptr);
+    	 status = webserver_page_shankariot(resp_packet_ptr, server_ptr,resource, cmd_string);
 
      /* Return completion status. */
      //return(NX_HTTP_CALLBACK_COMPLETED);
    }
+     else if(strcmp(resource,"/stylesheet.css")==0)
+     {
+       /* send the stylesheet css file */
+         nx_http_server_callback_data_send(server_ptr, (UCHAR*)style_sheet_css, sizeof(style_sheet_css));
+     }
+#if 0
     else if(strcmp(resource,"/top.html") == 0)
    {
      /* Found it, override the GET processing by sending the resource
@@ -231,7 +239,8 @@ UINT http_request_notify(NX_HTTP_SERVER *server_ptr, UINT request_type,CHAR *res
      contents directly. */
      //nx_http_server_callback_data_send(server_ptr,
      //"HTTP/1.0 200 \r\nContent-Length: 103\r\nContent-Type: text/html\r\n\r\n", 63);
-    	status = webserver_framework_index(resp_packet_ptr,server_ptr);
+    	//status = webserver_framework_index(resp_packet_ptr,server_ptr);
+    	status = webserver_page_deviceconfig(resp_packet_ptr, server_ptr, resource, cmd_string);
 
      /* Return completion status. */
      //return(NX_HTTP_CALLBACK_COMPLETED);
@@ -241,6 +250,12 @@ UINT http_request_notify(NX_HTTP_SERVER *server_ptr, UINT request_type,CHAR *res
       /* send the stylesheet css file */
         nx_http_server_callback_data_send(server_ptr, (UCHAR*)style_sheet_css, sizeof(style_sheet_css));
     }
+    //else if(strcmp(resource,"/device.html") == 0)
+    //{
+      /* Display the device config page*/
+      //status = webserver_page_deviceconfig(resp_packet_ptr, server_ptr, resource, cmd_string);
+    //}
+#endif
     else
     {
     	return(NX_SUCCESS);
@@ -604,7 +619,6 @@ UINT stm_mqtt_pubsub()
 
     if(mqtt_connect_status==0)
     {
-    	mqtt_connect_status=1;
         if(status =  nx_ip_address_get(&nx_ip, &ip_address, &network_mask))
         {
         	printf("ERROR: Failed to get ip (0x%08x)\r\n", status);
@@ -618,51 +632,55 @@ UINT stm_mqtt_pubsub()
         {
         	printf("Error in creating MQTT client: 0x%02x\n", status);
         }
-		if(host_ip_address==0)
-		{
-			if(WIFI_GetHostAddress("xyz",&host_ip_address) != WIFI_STATUS_OK)
+        if(mqtt_endpoint_Memory[0]=='m')
+        {
+        	mqtt_connect_status=1;
+			if(host_ip_address==0)
 			{
-				printf("ERROR: WIFI_GetDNS_Address\r\n");
-				return NX_NOT_SUCCESSFUL;
+				if(WIFI_GetHostAddress(mqtt_endpoint_Memory,&host_ip_address) != WIFI_STATUS_OK)
+				{
+					printf("ERROR: WIFI_GetDNS_Address\r\n");
+					return NX_NOT_SUCCESSFUL;
+				}
 			}
-		}
-		host_ip_address=__builtin_bswap32(host_ip_address);
-	#ifdef NXD_MQTT_OVER_WEBSOCKET
-		//status = nxd_mqtt_client_websocket_set(&mqtt_client, (UCHAR *)"MY-PC", sizeof("MY-PC") - 1,
-			//								   (UCHAR *)"mqtt://MY-PC:1883", sizeof("mqtt://MY-PC:1883") - 1);
-		//if (status)
-		//{
-			//printf("Error in setting MQTT over WebSocket: 0x%02x\r\n", status);
-			//error_counter++;
-		//}
-	#endif /* NXD_MQTT_OVER_WEBSOCKET */
+			host_ip_address=__builtin_bswap32(host_ip_address);
+		#ifdef NXD_MQTT_OVER_WEBSOCKET
+			//status = nxd_mqtt_client_websocket_set(&mqtt_client, (UCHAR *)"MY-PC", sizeof("MY-PC") - 1,
+				//								   (UCHAR *)"mqtt://MY-PC:1883", sizeof("mqtt://MY-PC:1883") - 1);
+			//if (status)
+			//{
+				//printf("Error in setting MQTT over WebSocket: 0x%02x\r\n", status);
+				//error_counter++;
+			//}
+		#endif /* NXD_MQTT_OVER_WEBSOCKET */
 
-		/* Register the disconnect notification function. */
-		nxd_mqtt_client_disconnect_notify_set(&mqtt_client, MQTT_my_disconnect_func);
+			/* Register the disconnect notification function. */
+			nxd_mqtt_client_disconnect_notify_set(&mqtt_client, MQTT_my_disconnect_func);
 
-		/* Create an event flag for this demo. */
-		status = tx_event_flags_create(&mqtt_app_flag, "my app event");
-
-
-		mqtt_server_ip.nxd_ip_version = 4;
-		mqtt_server_ip.nxd_ip_address.v4 = host_ip_address;//MQTT_LOCAL_SERVER_ADDRESS;//
+			/* Create an event flag for this demo. */
+			status = tx_event_flags_create(&mqtt_app_flag, "my app event");
 
 
-		/* Start the connection to the server. */
-		status = nxd_mqtt_client_login_set(&mqtt_client,"xyz", strlen("xyz"),"xyz",strlen("xyz"));
-		status = nxd_mqtt_client_connect(&mqtt_client, &mqtt_server_ip, NXD_MQTT_PORT,
-										 MQTT_KEEP_ALIVE_TIMER, 0, NX_WAIT_FOREVER);
+			mqtt_server_ip.nxd_ip_version = 4;
+			mqtt_server_ip.nxd_ip_address.v4 = host_ip_address;//MQTT_LOCAL_SERVER_ADDRESS;//
 
-		/* Subscribe to the topic with QoS level 0. */
-		status = nxd_mqtt_client_subscribe(&mqtt_client, TOPIC_NAME, STRLEN(TOPIC_NAME), QOS0);
 
-		/* Set the receive notify function. */
-		status = nxd_mqtt_client_receive_notify_set(&mqtt_client, MQTT_my_notify_func);
+			/* Start the connection to the server. */
+			status = nxd_mqtt_client_login_set(&mqtt_client,mqtt_username_Memory, strlen(mqtt_username_Memory),mqtt_pwd_Memory,strlen(mqtt_pwd_Memory));
+			status = nxd_mqtt_client_connect(&mqtt_client, &mqtt_server_ip, NXD_MQTT_PORT,
+											 MQTT_KEEP_ALIVE_TIMER, 0, NX_WAIT_FOREVER);
 
-		/* Publish a message with QoS Level 1. */
-		status = nxd_mqtt_client_publish(&mqtt_client, TOPIC_NAME, STRLEN(TOPIC_NAME),
-										 (CHAR*)MESSAGE_STRING, STRLEN(MESSAGE_STRING), 0, QOS1, NX_WAIT_FOREVER);
+			/* Subscribe to the topic with QoS level 0. */
+			status = nxd_mqtt_client_subscribe(&mqtt_client, TOPIC_NAME, STRLEN(TOPIC_NAME), QOS0);
 
+			/* Set the receive notify function. */
+			status = nxd_mqtt_client_receive_notify_set(&mqtt_client, MQTT_my_notify_func);
+
+			/* Publish a message with QoS Level 1. */
+			status = nxd_mqtt_client_publish(&mqtt_client, TOPIC_NAME, STRLEN(TOPIC_NAME),
+											 (CHAR*)MESSAGE_STRING, STRLEN(MESSAGE_STRING), 0, QOS1, NX_WAIT_FOREVER);
+
+        }
 		if(status!=0){
 		mqtt_connect_status=0;
 		}
@@ -687,14 +705,17 @@ UINT stm_mqtt_pubsub()
     }
     if(mqtt_connect_status==0)
     {
+		if(mqtt_endpoint_Memory[0]=='m')
+		{
 
-    /* Now unsubscribe the topic. */
-    nxd_mqtt_client_unsubscribe(&mqtt_client, TOPIC_NAME, STRLEN(TOPIC_NAME));
-    /* Disconnect from the broker. */
-	nxd_mqtt_client_disconnect(&mqtt_client);
+			/* Now unsubscribe the topic. */
+			nxd_mqtt_client_unsubscribe(&mqtt_client, TOPIC_NAME, STRLEN(TOPIC_NAME));
+			/* Disconnect from the broker. */
+			nxd_mqtt_client_disconnect(&mqtt_client);
+		}
 
 	/* Delete the client instance, release all the resources. */
-	nxd_mqtt_client_delete(&mqtt_client);
+		status = nxd_mqtt_client_delete(&mqtt_client);
     }
     return status;
 

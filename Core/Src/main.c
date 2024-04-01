@@ -32,6 +32,10 @@
 char WiFi_SSID_Memory[20];
 char WiFi_PWD_Memory[50];
 int WiFi_Select_Mode = 3;
+char mqtt_endpoint_Memory[50];
+char mqtt_username_Memory[20];
+char mqtt_pwd_Memory[50];
+
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */

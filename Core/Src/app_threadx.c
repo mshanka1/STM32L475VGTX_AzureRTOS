@@ -209,7 +209,10 @@ void tx_mqtt_thread_entry(ULONG thread_input)
     printf("Starting Azure MQTT thread\r\n\r\n");
     tx_semaphore_get(&tx_mqtt_semaphore, TX_WAIT_FOREVER);
     do{
-    	stm_mqtt_pubsub();
+    	if(mqtt_endpoint_Memory[0]=='m')
+    	{
+    		stm_mqtt_pubsub();
+    	}
     	tx_thread_sleep(1000);
 
     }while(!status);
